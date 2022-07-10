@@ -1,21 +1,25 @@
 #include "board.h"
 #include "define.h"
-#include "stupidAI.h"
 #include "fun.h"
+#include "stupidAI.h"
 Board brd;
 
 // 其中"name?","new","move","end","quit","error"为平台向引擎传递命令；
 // "name","move"为引擎向平台传递命令字
-int main() {
+int main()
+{
     string message;
     int ai;
-    while (1) {
+    while (1)
+    {
         cin >> message;
-        if (message == "move") {
+        if (message == "move")
+        {
             int n;
             cin >> n >> message;
             //解析发来的信息
-            for (int i = 0; i < message.size(); i += 3) {
+            for (int i = 0; i < message.size(); i += 3)
+            {
                 string t;
                 t += message[i];
                 t += message[i + 1];
@@ -24,39 +28,55 @@ int main() {
                 brd.occLine(ai, change(t));
             }
             //调用AI
-            stupidAI(brd,ai);
+            stupidAI(brd, ai);
             // randAI(brd,ai);
-        } else if (message == "name?") {
+        }
+        else if (message == "name?")
+        {
             cout << "name stupidAI" << endl;
-        } else if (message == "new") {
+        }
+        else if (message == "new")
+        {
             cin >> message;
             // brd.reset();
-            if (message == "black") {
+            if (message == "black")
+            {
                 ai = BLACK;
                 // stupidAi(ai);
-                randAI(brd,ai);
-            } else {
+                randAI(brd, ai);
+            }
+            else
+            {
                 ai = WHITE;
             }
-        } else if (message == "error") {
+        }
+        else if (message == "error")
+        {
             cout << "error! check it!" << endl;
-        } else if (message == "end") {
+        }
+        else if (message == "end")
+        {
             cin >> message;
             fflush(stdin);
-            if (message == "black") {
-                if (ai == BLACK) {
-                    cout << "Win!" << endl;
-                } else {
-                    cout << "Defect!" << endl;
-                }
-            } else {
-                if (ai == WHITE) {
-                    cout << "Win!" << endl;
-                } else {
+            if (message == "black")
+            {
+                if (ai == BLACK) { cout << "Win!" << endl; }
+                else
+                {
                     cout << "Defect!" << endl;
                 }
             }
-        } else if (message == "quit") {
+            else
+            {
+                if (ai == WHITE) { cout << "Win!" << endl; }
+                else
+                {
+                    cout << "Defect!" << endl;
+                }
+            }
+        }
+        else if (message == "quit")
+        {
             cout << "Bye Bye" << endl;
             return 0;
         }

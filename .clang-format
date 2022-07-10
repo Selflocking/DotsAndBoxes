@@ -1,7 +1,7 @@
 ---
 # 语言: None, Cpp, Java, JavaScript, ObjC, Proto, TableGen, TextProto
 Language:	Cpp
-BasedOnStyle:	LLVM
+BasedOnStyle:	Microsoft
 # 访问说明符(public、private等)的偏移
 AccessModifierOffset:	-2
 # 开括号(开圆括号、开尖括号、开方括号)后的对齐: Align, DontAlign, AlwaysBreak(总是在开括号后换行)
@@ -34,6 +34,6 @@ IndentWidth:	4
 MaxEmptyLinesToKeep:	1
 
 # 指针和引用的对齐: Left, Right, Middle
-PointerAlignment: Middle
+# PointerAlignment: Middle
 # tab宽度
 TabWidth:	4
