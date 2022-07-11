@@ -11,7 +11,7 @@
  * @param brd 棋盘，一定要用&
  * @param owner 下棋方
  */
-inline void stupidAI(Board &brd, int owner)
+inline void stupidAI(Board &brd, int owner,fstream& o1)//o1流用来记录棋谱
 {
     string res;
     bool flag = 1;
@@ -30,6 +30,8 @@ inline void stupidAI(Board &brd, int owner)
         brd.occLine(owner, t);
     }
     cout << "move " << res.size() / 3 << " " << res << endl;
+    o1<<"move "<< res.size() / 3 << " " << res << endl;
+    
 }
 
 /**
@@ -38,7 +40,7 @@ inline void stupidAI(Board &brd, int owner)
  * @param brd 棋盘，一定要用&
  * @param owner 下棋方
  */
-inline void randAI(Board &brd, int owner)
+inline void randAI(Board &brd, int owner, fstream& o1)
 {
     string res;
     bool flag = 1;
@@ -52,4 +54,5 @@ inline void randAI(Board &brd, int owner)
         if (!brd.occLine(owner, t)) { flag = 0; }
     }
     cout << "move " << res.size() / 3 << " " << res << endl;
+    o1 << "move " << res.size() / 3 << " " << res << endl;
 }

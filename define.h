@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <utility>
 #include <vector>
+#include <fstream>
+#include <time.h>
 
 #pragma once
 //点
@@ -38,3 +40,5 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
+using std::fstream;
+using std::ios;

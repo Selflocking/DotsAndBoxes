@@ -6,18 +6,23 @@ Board brd;
 
 // 其中"name?","new","move","end","quit","error"为平台向引擎传递命令；
 // "name","move"为引擎向平台传递命令字
+// 我们需要记录棋谱因此需要两个本地txt文件名字规定为chess.txt
 int main()
 {
     string message;
     int ai;
+    fstream log1;  
+    log1.open("chess.txt",ios::out);
     while (1)
     {
         cin >> message;
+        log1 << message << endl;
         if (message == "move")
         {
             int n;
             cin >> n >> message;
-            //解析发来的信息
+            log1<<n<<" "<<message<<endl;
+            //解析并log（录入日志）发来的信息
             for (int i = 0; i < message.size(); i += 3)
             {
                 string t;
@@ -28,22 +33,24 @@ int main()
                 brd.occLine(ai, change(t));
             }
             //调用AI
-            stupidAI(brd, ai);
-            // randAI(brd,ai);
+            //stupidAI(brd, ai,log1);
+            randAI(brd,ai,log1);
         }
         else if (message == "name?")
         {
             cout << "name stupidAI" << endl;
+            log1 << "name stupidAI" << endl;
         }
         else if (message == "new")
         {
             cin >> message;
+            log1 << message <<endl; 
             // brd.reset();
             if (message == "black")
             {
                 ai = BLACK;
-                // stupidAi(ai);
-                randAI(brd, ai);
+                //stupidAi(ai);
+                randAI(brd, ai,log1);
             }
             else
             {
@@ -53,10 +60,12 @@ int main()
         else if (message == "error")
         {
             cout << "error! check it!" << endl;
+            log1 << "error! check it!" << endl;
         }
         else if (message == "end")
         {
             cin >> message;
+            log1<< message << endl;
             fflush(stdin);
             if (message == "black")
             {

@@ -1,0 +1,20 @@
+name?
+name stupidAI
+new
+white
+move
+1 AAA
+move 1 BCA
+move
+1 AAD
+move 1 AEE
+move
+1 BED
+move 1 AFA
+move
+1 AEA
+move 1 BAA
+move
+1 ABA
+move 1 ACC
+quit
