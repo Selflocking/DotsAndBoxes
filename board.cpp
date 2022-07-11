@@ -1,4 +1,5 @@
 #include "board.h"
+#include <random>
 
 /**
  * @brief 默认构造函数，分为DOT，BOX，HENG，SHU。freeline是getRandLine()使用的，存放的是所有边
@@ -15,19 +16,18 @@ Board::Board()
             else if (i % 2 == 0 && j % 2 == 1)
             {
                 map[i][j] = HENG;
-                freeline.push_back({i, j});
+                freeline.emplace_back(i, j);
             }
             else if (i % 2 == 1 && j % 2 == 1)
                 map[i][j] = BOX;
             else
             {
                 map[i][j] = SHU;
-                freeline.push_back({i, j});
+                freeline.emplace_back(i, j);
             }
         }
     }
-    srand(time(NULL));
-    random_shuffle(freeline.begin(), freeline.end());
+    shuffle(freeline.begin(), freeline.end(), std::mt19937(std::random_device()()));
 }
 
 /**
@@ -107,38 +107,6 @@ void Board::printBoard()
            "O(10,1)O(10,3)O(10,5)O(10,7)O(10,9)O\n");
 }
 
-// TODO: 更新长链，双交等
-/**
- * @brief 更新状态，即更新长链，环，双交的情况
- *
- * @param l 坐标
- */
-void Board::statusUpdates(LOC l)
-{
-    if (map[l.first][l.second] == HENG)
-    {
-        if (l.first == 0) {}
-        else if (l.first == 10)
-        {
-        }
-        else
-        {
-        }
-    }
-    else
-    {
-        if (l.second == 0) {}
-        else if (l.second == 10)
-        {
-        }
-        else
-        {
-        }
-    }
-}
-
-void Board::statusUpdates() {}
-
 /**
  * @brief 占线
  * @line 默认传进来的线都是没有被占过的
@@ -154,7 +122,7 @@ void Board::statusUpdates() {}
 int Board::occLine(int owner, LOC l)
 {
     int res = 0;
-    //如果传进来的坐标不是边，输出
+    // 如果传进来的坐标不是边，输出
     if (map[l.first][l.second] == DOT || map[l.first][l.second] >= OCCLINE)
     {
         cerr << "Board::occLine(LOC l): " << l.first << " " << l.second << "\n";
@@ -224,8 +192,8 @@ int Board::occLine(int owner, LOC l)
             }
         }
     }
-    //更新棋盘中长链，双交等
-    // statusUpdates(l);
+    // 更新棋盘中长链，双交等
+    //  statusUpdates(l);
     map[l.first][l.second] = OCCLINE;
     return res;
 }
@@ -271,7 +239,7 @@ LOC Board::eatCBoxs(int owner)
             }
         }
     }
-    //找不到默认返回{-1，-1}
+    // 找不到默认返回{-1，-1}
     return {-1, -1};
 }
 
@@ -310,19 +278,18 @@ void Board::reset()
             else if (i % 2 == 0 && j % 2 == 1)
             {
                 map[i][j] = HENG;
-                freeline.push_back({i, j});
+                freeline.emplace_back(i, j);
             }
             else if (i % 2 == 1 && j % 2 == 1)
                 map[i][j] = BOX;
             else
             {
                 map[i][j] = SHU;
-                freeline.push_back({i, j});
+                freeline.emplace_back(i, j);
             }
         }
     }
-    srand(time(NULL));
-    random_shuffle(freeline.begin(), freeline.end());
+    shuffle(freeline.begin(), freeline.end(), std::mt19937(std::random_device()()));
 }
 
 /**
@@ -332,9 +299,70 @@ void Board::reset()
  */
 LOC Board::getRandLine()
 {
-    while (!freeline.empty() && map[freeline.back().first][freeline.back().second] == OCCLINE) { freeline.pop_back(); }
+    while (!freeline.empty() && !isFree(freeline.back()) && makeCBox(freeline.back())) freeline.pop_back();
     if (freeline.empty()) return {-1, -1};
+
     LOC t = freeline.back();
     freeline.pop_back();
     return t;
+}
+
+bool Board::isFree(LOC l)
+{
+    if (map[l.first][l.second] == OCCLINE)
+        return false;
+    else
+        return true;
+}
+
+bool Board::makeCBox(LOC l)
+{
+    if (map[l.first][l.second] == HENG)
+    {
+        if (l.first == 0)
+        {
+            if (getFreedom(l.first, l.second + 1) == 2)
+                return true;
+            else
+                return false;
+        }
+        else if (l.first == 10)
+        {
+            if (getFreedom(l.first, l.second - 1) == 2)
+                return true;
+            else
+                return false;
+        }
+        else
+        {
+            if (getFreedom(l.first, l.second - 1) == 2 || getFreedom(l.first, l.second + 1) == 2)
+                return true;
+            else
+                return false;
+        }
+    }
+    else
+    {
+        if (l.second == 0)
+        {
+            if (getFreedom(l.first + 1, l.second) == 2)
+                return true;
+            else
+                return false;
+        }
+        else if (l.second == 10)
+        {
+            if (getFreedom(l.first - 1, l.second) == 2)
+                return true;
+            else
+                return false;
+        }
+        else
+        {
+            if (getFreedom(l.first - 1, l.second) == 2 || getFreedom(l.first + 1, l.second) == 2)
+                return true;
+            else
+                return false;
+        }
+    }
 }

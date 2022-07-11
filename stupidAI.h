@@ -14,9 +14,9 @@
 inline void stupidAI(Board &brd, int owner,fstream& o1)//o1流用来记录棋谱
 {
     string res;
-    bool flag = 1;
+    bool flag = true;
     LOC t;
-    while (1)
+    while (true)
     {
         //如果遇到可以C型格，eatCBoxs()会occline这条边，所以下面不需要条用occline()
         t = brd.eatCBoxs(owner);
@@ -43,7 +43,7 @@ inline void stupidAI(Board &brd, int owner,fstream& o1)//o1流用来记录棋谱
 inline void randAI(Board &brd, int owner, fstream& o1)
 {
     string res;
-    bool flag = 1;
+    bool flag = true;
     while (flag)
     {
         // getRandLine()执行失败时返回{-1，-1};
@@ -51,7 +51,7 @@ inline void randAI(Board &brd, int owner, fstream& o1)
         // t.first==-1,是t=={-1，-1}的简写
         if (t.first == -1) break;
         res += change(t);
-        if (!brd.occLine(owner, t)) { flag = 0; }
+        if (!brd.occLine(owner, t))  flag = false;
     }
     cout << "move " << res.size() / 3 << " " << res << endl;
     o1 << "move " << res.size() / 3 << " " << res << endl;
