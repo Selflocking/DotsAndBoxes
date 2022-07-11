@@ -13,7 +13,7 @@ int main()
     int ai;
     fstream log1;  
     log1.open("chess.txt",ios::out);
-    while (1)
+    while (true)
     {
         cin >> message;
         log1 << message << endl;
