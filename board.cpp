@@ -16,18 +16,15 @@ Board::Board()
             else if (i % 2 == 0 && j % 2 == 1)
             {
                 map[i][j] = HENG;
-                freeline.emplace_back(i, j);
             }
             else if (i % 2 == 1 && j % 2 == 1)
                 map[i][j] = BOX;
             else
             {
                 map[i][j] = SHU;
-                freeline.emplace_back(i, j);
             }
         }
     }
-    shuffle(freeline.begin(), freeline.end(), std::mt19937(std::random_device()()));
 }
 
 /**
@@ -37,9 +34,9 @@ Board::Board()
  */
 Board::Board(const Board &other)
 {
-    this->freeline = other.freeline;
     for (int i = 0; i < 11; ++i)
-        for (int j = 0; j < 11; ++j) map[i][j] = other.map[i][j];
+        for (int j = 0; j < 11; ++j)
+            map[i][j] = other.map[i][j];
 }
 
 /**
@@ -47,10 +44,11 @@ Board::Board(const Board &other)
  *
  * @param m 棋盘
  */
-Board::Board(int8_t m[11][11])
+Board::Board(int m[11][11])
 {
     for (int i = 0; i < 11; ++i)
-        for (int j = 0; j < 11; ++j) map[i][j] = m[i][j];
+        for (int j = 0; j < 11; ++j)
+            map[i][j] = m[i][j];
 }
 
 /**
@@ -62,16 +60,15 @@ Board::Board(int8_t m[11][11])
  */
 int Board::getFreedom(int x, int y)
 {
-    if (map[x][y] < isBOX)
-    {
-        cerr << "<getFreedom>";
-        return -1;
-    }
     int cnt = 4;
-    if (map[x - 1][y] == OCCLINE) --cnt;
-    if (map[x + 1][y] == OCCLINE) --cnt;
-    if (map[x][y - 1] == OCCLINE) --cnt;
-    if (map[x][y + 1] == OCCLINE) --cnt;
+    if (map[x - 1][y] == OCCLINE)
+        --cnt;
+    if (map[x + 1][y] == OCCLINE)
+        --cnt;
+    if (map[x][y - 1] == OCCLINE)
+        --cnt;
+    if (map[x][y + 1] == OCCLINE)
+        --cnt;
     return cnt;
 }
 
@@ -81,7 +78,10 @@ int Board::getFreedom(int x, int y)
  * @param l 坐标
  * @return int 自由度
  */
-int Board::getFreedom(LOC l) { return getFreedom(l.first, l.second); }
+int Board::getFreedom(LOC l)
+{
+    return getFreedom(l.first, l.second);
+}
 
 /**
  * @brief 打印棋盘，暂时没用
@@ -123,7 +123,7 @@ int Board::occLine(int owner, LOC l)
 {
     int res = 0;
     // 如果传进来的坐标不是边，输出
-    if (map[l.first][l.second] == DOT || map[l.first][l.second] >= OCCLINE)
+    if (!isFreeLine(l))
     {
         cerr << "Board::occLine(LOC l): " << l.first << " " << l.second << "\n";
         return 0;
@@ -256,7 +256,8 @@ vector<LOC> Board::eatAllCBoxs(int owner)
     while (1)
     {
         l = eatCBoxs(owner);
-        if (l.first == -1 || l.second == -1) break;
+        if (l.first == -1 || l.second == -1)
+            break;
         res.push_back(l);
     }
     return res;
@@ -268,7 +269,6 @@ vector<LOC> Board::eatAllCBoxs(int owner)
  */
 void Board::reset()
 {
-    freeline.clear();
     for (int i = 0; i < 11; ++i)
     {
         for (int j = 0; j < 11; ++j)
@@ -278,38 +278,20 @@ void Board::reset()
             else if (i % 2 == 0 && j % 2 == 1)
             {
                 map[i][j] = HENG;
-                freeline.emplace_back(i, j);
             }
             else if (i % 2 == 1 && j % 2 == 1)
                 map[i][j] = BOX;
             else
             {
                 map[i][j] = SHU;
-                freeline.emplace_back(i, j);
             }
         }
     }
-    shuffle(freeline.begin(), freeline.end(), std::mt19937(std::random_device()()));
 }
 
-/**
- * @brief 得到一条随机边
- *
- * @return LOC 随机边的坐标
- */
-LOC Board::getRandLine()
+bool Board::isFreeLine(LOC l) const
 {
-    while (!freeline.empty() && !isFree(freeline.back()) && makeCBox(freeline.back())) freeline.pop_back();
-    if (freeline.empty()) return {-1, -1};
-
-    LOC t = freeline.back();
-    freeline.pop_back();
-    return t;
-}
-
-bool Board::isFree(LOC l)
-{
-    if (map[l.first][l.second] == OCCLINE)
+    if (map[l.first][l.second] != SHU && map[l.first][l.second] != HENG)
         return false;
     else
         return true;
@@ -364,5 +346,48 @@ bool Board::makeCBox(LOC l)
             else
                 return false;
         }
+    }
+}
+Board &Board::operator=(const Board &other)
+{
+    if (this == &other)
+        return *this;
+    for (int i = 0; i < 11; ++i)
+    {
+        for (int j = 0; j < 11; ++j)
+        {
+            this->map[i][j] = other.map[i][j];
+        }
+    }
+    return *this;
+}
+int Board::winner() const
+{
+    int B = 0;
+    int W = 0;
+    for (int i = 1; i < 11; i += 2)
+    {
+        for (int j = 1; j < 11; j += 2)
+        {
+            if (map[i][j] == BLACK)
+                ++B;
+            if (map[i][j] == WHITE)
+                ++W;
+        }
+    }
+    if (B > W)
+        return BLACK;
+    else
+        return WHITE;
+}
+void Board::print()
+{
+    for (int i = 0; i < 11; ++i)
+    {
+        for (int j = 0; j < 11; ++j)
+        {
+            printf("%2d ", map[i][j]);
+        }
+        cout << "\n";
     }
 }

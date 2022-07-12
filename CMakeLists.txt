@@ -11,4 +11,4 @@ add_executable(dots_and_boxs
         define.h
         fun.h
         main.cpp
-        stupidAI.h)
+        Node.cpp Node.h)

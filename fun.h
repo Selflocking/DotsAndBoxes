@@ -1,6 +1,6 @@
 #include "define.h"
 #pragma once
-//一条线 LOC 转 string
+// 一条线 LOC 转 string
 inline string change(LOC l)
 {
     string s;
@@ -19,7 +19,7 @@ inline string change(LOC l)
     return s;
 }
 
-//一条线 string 转 LOC
+// 一条线 string 转 LOC
 inline LOC change(string l)
 {
     LOC res;
