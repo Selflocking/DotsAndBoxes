@@ -10,7 +10,8 @@
 Board brd;
 constexpr int LIMIT = 30;
 constexpr int SEARCH = 100;
-constexpr int DEEP = 3;
+constexpr double DEEP = 3;
+constexpr int THREAD = 12;
 LOC UCTSearch(Board board, int owner);
 void NodeSearch(Node &node, int deep);
 double play(Node *node);
@@ -72,7 +73,6 @@ int main()
         }
         else if (message == "end")
         {
-
         }
         else if (message == "quit")
         {
@@ -97,15 +97,26 @@ LOC UCTSearch(Board board, int owner)
     }
     int max = 0;
     LOC res(-1, -1);
-    std::thread t[60];
-    for (int i = 0; i < root.children.size(); ++i)
+    for (int i = 0; i < root.children.size() / THREAD; ++i)
     {
-        t[i] = std::thread(NodeSearch, std::ref(root.children[i]), 1);
+        std::thread t[THREAD];
+        for (int j = i * THREAD; j < i * THREAD + THREAD && j < root.children.size(); ++j)
+        {
+            t[j%THREAD] = std::thread(NodeSearch, std::ref(root.children[j]), 1);
+        }
+        for (int j = i * THREAD; j < i * THREAD + THREAD && j < root.children.size(); ++j)
+        {
+            t[j%THREAD].join();
+        }
     }
-    for (int i = 0; i < root.children.size(); ++i)
-    {
-        t[i].join();
-    }
+    //    for (int i = 0; i < root.children.size(); ++i)
+    //    {
+    //        t[i] = std::thread(NodeSearch, std::ref(root.children[i]), 1);
+    //    }
+    //    for (int i = 0; i < root.children.size(); ++i)
+    //    {
+    //        t[i].join();
+    //    }
     for (auto &i : root.children)
     {
         if (i.win >= max)
@@ -189,16 +200,17 @@ double play(Node *node)
 void UCT(Board &board, int owner)
 {
     time_t begin = time(nullptr);
+
     string res;
-    LOC l = UCTSearch(board, owner);
-    res += change(l);
-    while (board.occLine(owner, l))
+    LOC l;
+    do
     {
         l = UCTSearch(board, owner);
         if (l.first == -1)
-            break;
+            return;
         res += change(l);
-    }
+    } while (board.occLine(owner, l));
+
     time_t cost = time(nullptr) - begin;
     if (cost > 60)
     {

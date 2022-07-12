@@ -350,8 +350,6 @@ bool Board::makeCBox(LOC l)
 }
 Board &Board::operator=(const Board &other)
 {
-    if (this == &other)
-        return *this;
     for (int i = 0; i < 11; ++i)
     {
         for (int j = 0; j < 11; ++j)
