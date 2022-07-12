@@ -3,13 +3,16 @@
 #include "define.h"
 #include "fun.h"
 #include <ctime>
+#include <pthread.h>
 #include <queue>
 #include <random>
+#include <thread>
 Board brd;
 constexpr int LIMIT = 30;
-constexpr int SEARCH = 1000;
-LOC UCTSearch(Board board, int owner,int deep);
-Node expend(Node *parent, Board, int owner, LOC);
+constexpr int SEARCH = 100;
+constexpr int DEEP = 3;
+LOC UCTSearch(Board board, int owner);
+void NodeSearch(Node &node, int deep);
 double play(Node *node);
 void UCT(Board &board, int owner);
 // 其中"name?","new","move","end","quit","error"为平台向引擎传递命令；
@@ -69,31 +72,7 @@ int main()
         }
         else if (message == "end")
         {
-            cin >> message;
-            log1 << message << endl;
-            fflush(stdin);
-            if (message == "black")
-            {
-                if (ai == BLACK)
-                {
-                    cout << "Win!" << endl;
-                }
-                else
-                {
-                    cout << "Defect!" << endl;
-                }
-            }
-            else
-            {
-                if (ai == WHITE)
-                {
-                    cout << "Win!" << endl;
-                }
-                else
-                {
-                    cout << "Defect!" << endl;
-                }
-            }
+
         }
         else if (message == "quit")
         {
@@ -103,34 +82,63 @@ int main()
     }
 }
 
-LOC UCTSearch(Board board, int owner,int deep)
+LOC UCTSearch(Board board, int owner)
 {
-    cout << "UCTSearch Begin\n";
     Node root(board, owner);
-    std::priority_queue<Node, vector<Node>, std::greater<>> heap;
-    board.print();
     for (int i = 0; i < 11; ++i)
     {
         for (int j = 0; j < 11; ++j)
         {
             if (board.isFreeLine({i, j}))
             {
-                heap.push(expend(&root, board, -owner, LOC(i, j)));
+                root.children.emplace_back(Node{board, -owner, &root, INF, LOC{i, j}});
             }
         }
     }
-    time_t begin = time(nullptr);
-    int n = 0;
-    while (time(nullptr) - begin < LIMIT)
+    int max = 0;
+    LOC res(-1, -1);
+    std::thread t[60];
+    for (int i = 0; i < root.children.size(); ++i)
     {
-        Node t = heap.top();
-        heap.pop();
-        ++n;
-        t.value = play(&t) + sqrt(2 * log(n * SEARCH) / SEARCH);
-        heap.push(t);
+        t[i] = std::thread(NodeSearch, std::ref(root.children[i]), 1);
     }
-    cout<<"Max value: "<<heap.top().value<<"\n";
-    return heap.top().action;
+    for (int i = 0; i < root.children.size(); ++i)
+    {
+        t[i].join();
+    }
+    for (auto &i : root.children)
+    {
+        if (i.win >= max)
+        {
+            max = i.win;
+            res = i.action;
+        }
+    }
+    return res;
+}
+void NodeSearch(Node &node, int deep)
+{
+    if (deep >= DEEP)
+    {
+        play(&node);
+        return;
+    }
+    for (int i = 0; i < 11; ++i)
+    {
+        for (int j = 0; j < 11; ++j)
+        {
+            if (node.board.isFreeLine({i, j}))
+            {
+                node.children.emplace_back(Node{node.board, -node.owner, &node, INF, LOC{i, j}});
+            }
+        }
+    }
+    for (auto &i : node.children)
+    {
+        NodeSearch(i, deep + 1);
+        node.win += i.win;
+        node.n += i.n;
+    }
 }
 double play(Node *node)
 {
@@ -167,28 +175,38 @@ double play(Node *node)
         }
 
         if (t.board.winner() == node->owner)
+        {
             ++win;
+        }
         t = *node;
         lt = lines;
     }
+    node->parent->n += SEARCH;
+    node->parent->win += win;
     return 1.0 * win / SEARCH;
 }
 
-Node expend(Node *parent, Board board, int owner, LOC l)
-{
-    board.occLine(owner, l);
-    parent->n++;
-    return Node{board, owner, parent, INF, l};
-}
 void UCT(Board &board, int owner)
 {
+    time_t begin = time(nullptr);
     string res;
-    LOC l = UCTSearch(board, owner, 1);
+    LOC l = UCTSearch(board, owner);
     res += change(l);
     while (board.occLine(owner, l))
     {
-        LOC t = UCTSearch(board, owner,1);
-        res += change(t);
+        l = UCTSearch(board, owner);
+        if (l.first == -1)
+            break;
+        res += change(l);
+    }
+    time_t cost = time(nullptr) - begin;
+    if (cost > 60)
+    {
+        printf("cost: %2d min %2d sec\n", cost / 60, cost % 60);
+    }
+    else
+    {
+        printf("cost: %2d sec\n", cost);
     }
     cout << "move " << res.size() / 3 << " " << res << endl;
 }

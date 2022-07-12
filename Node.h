@@ -11,14 +11,16 @@ class Node
   public:
     Board board;
     Node *parent;
-    int n;
-    double value;
+    int win = 0;
+    int n = 1;
+    double value ;
     int owner;
     LOC action;
+    vector<Node> children;
     Node();
-    Node(const Board &, int);
-    Node(const Board &, int, Node *, int);
-    Node(const Board &, int, Node *, int, LOC);
+    Node(const Board &, int owner);
+    Node(const Board &, int owner, Node * parent, int value);
+    Node(const Board &, int owner, Node * parent, int value, LOC l);
     bool operator<(const Node &) const;
     bool operator>(const Node &) const;
 };

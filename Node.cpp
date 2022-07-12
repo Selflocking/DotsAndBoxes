@@ -30,6 +30,7 @@ Node::Node(const Board &brd, int own, Node *prt, int val, LOC l)
     parent = prt;
     value = val;
     action = l;
+    board.occLine(owner,l);
 }
 bool Node::operator>(const Node &other) const
 {
