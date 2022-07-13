@@ -9,6 +9,6 @@ add_executable(dots_and_boxs
         board.cpp
         board.h
         define.h
-        fun.h
+        fun.cpp
         main.cpp
-        Node.cpp Node.h)
+        Node.cpp Node.h UCT.cpp fun.h UCT.h)

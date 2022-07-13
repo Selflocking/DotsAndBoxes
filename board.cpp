@@ -2,8 +2,8 @@
 #include <random>
 
 /**
- * @brief 默认构造函数，分为DOT，BOX，HENG，SHU。freeline是getRandLine()使用的，存放的是所有边
- * @line 同为偶是点，同为奇是格子，先偶后奇是横线，先奇后偶是竖线
+ * @brief 默认构造函数，分为DOT，BOX，HENG，SHU。
+ * @details 同为偶是点，同为奇是格子，先偶后奇是横线，先奇后偶是竖线
  */
 Board::Board()
 {
@@ -109,11 +109,7 @@ void Board::printBoard()
 
 /**
  * @brief 占线
- * @line 默认传进来的线都是没有被占过的
- * @line 如果传进来的线是横线，要考虑它上下两个格子自由度是否为3；
- * @line 如果已经是3，那么再占一条线，这个格子就属于传进来下棋方的。
- * @line 同时要考虑边界情况，比如横线在最上面时，只需考虑线下面的格子
- * @line 同理，如果是竖线，就要考虑左右两个格子
+ * @details 默认传进来的线都是没有被占过的，如果传进来的线是横线，要考虑它上下两个格子自由度是否为3；如果已经是3，那么再占一条线，这个格子就属于传进来下棋方的。同时要考虑边界情况，比如横线在最上面时，只需考虑线下面的格子，同理，如果是竖线，就要考虑左右两个格子
  *
  * @param owner 代表下棋方
  * @param l 代表要占的线的坐标
@@ -205,7 +201,6 @@ int Board::occLine(int owner, LOC l)
  * whlie(l.first!=-1||l.second!=-1) l = brd.eatCBoxs(owner,l);
  *
  * @param owner 代表此时的下棋方
- * @param l 代表开始坐标，是带默认参数的，默认为{1，1}
  * @return LOC 返回一个C型格的坐标，找不到返回{-1，-1}
  */
 LOC Board::eatCBoxs(int owner)
@@ -243,52 +238,6 @@ LOC Board::eatCBoxs(int owner)
     return {-1, -1};
 }
 
-/**
- * @brief 吃光棋盘上的所有C型格，感觉这个函数没有用
- *
- * @param owner 代表下棋方
- * @return vector<LOC> 含有所有C型的坐标，如果为空，代表没有C型格
- */
-vector<LOC> Board::eatAllCBoxs(int owner)
-{
-    vector<LOC> res;
-    LOC l;
-    while (1)
-    {
-        l = eatCBoxs(owner);
-        if (l.first == -1 || l.second == -1)
-            break;
-        res.push_back(l);
-    }
-    return res;
-}
-
-/**
- * @brief 重置棋盘
- *
- */
-void Board::reset()
-{
-    for (int i = 0; i < 11; ++i)
-    {
-        for (int j = 0; j < 11; ++j)
-        {
-            if (i % 2 == 0 && j % 2 == 0)
-                map[i][j] = DOT;
-            else if (i % 2 == 0 && j % 2 == 1)
-            {
-                map[i][j] = HENG;
-            }
-            else if (i % 2 == 1 && j % 2 == 1)
-                map[i][j] = BOX;
-            else
-            {
-                map[i][j] = SHU;
-            }
-        }
-    }
-}
-
 bool Board::isFreeLine(LOC l) const
 {
     if (map[l.first][l.second] != SHU && map[l.first][l.second] != HENG)
@@ -296,7 +245,11 @@ bool Board::isFreeLine(LOC l) const
     else
         return true;
 }
-
+/**
+ * @brief 判断一个坐标是否会造成C型格
+ *
+ * @return ture表示会造成C型格
+ */
 bool Board::makeCBox(LOC l)
 {
     if (map[l.first][l.second] == HENG)
@@ -348,6 +301,7 @@ bool Board::makeCBox(LOC l)
         }
     }
 }
+
 Board &Board::operator=(const Board &other)
 {
     for (int i = 0; i < 11; ++i)
@@ -359,6 +313,12 @@ Board &Board::operator=(const Board &other)
     }
     return *this;
 }
+
+/**
+ * @brief 判断赢家
+ *
+ * @return 如果黑方胜利，返回BLACK，白方胜利返回WHITE，目前无胜方返回EMPTY
+ */
 int Board::winner() const
 {
     int B = 0;
@@ -373,11 +333,21 @@ int Board::winner() const
                 ++W;
         }
     }
-    if (B > W)
+    if (B > 12)
         return BLACK;
-    else
+    else if (W > 12)
         return WHITE;
+    else
+        return EMPTY;
 }
+
+/**
+ * @brief 打印当前局面
+ *
+ * @details 按值显示棋面
+ *
+ * @todo 需要改进成更加直观的显示方法
+ */
 void Board::print()
 {
     for (int i = 0; i < 11; ++i)

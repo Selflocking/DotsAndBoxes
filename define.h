@@ -2,11 +2,10 @@
  *此头文件是存放一些常用的宏定义
  */
 #include <algorithm>
+#include <cstdint>
 #include <cstring>
-#include <fstream>
+#include <ctime>
 #include <iostream>
-#include <stdint.h>
-#include <time.h>
 #include <utility>
 #include <vector>
 
@@ -27,6 +26,11 @@
 #define EMPTY 0
 #define BLACK 1
 #define WHITE -1
+
+constexpr int LIMIT = 30;   // 时间限制
+constexpr int SEARCH = 100; // 搜索次数限制
+constexpr double DEEP = 3;  // 拓展深度
+constexpr int THREAD = 12;  // 线程最大限制
 
 // 一些常用的
 // 不适用using namespace std,是为了防止和std空间里的命名冲突
