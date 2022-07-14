@@ -11,7 +11,7 @@ class Node
     Board board;                    /**< 棋面 */
     Node *parent;                   /**< 父节点 */
     int win = 0;                    /**< 胜利次数 */
-    int n = 1;                      /**< 总共模拟次数，设成1是为了代入UCB公式时不至于出现0/0 */
+    int total = 0;                      /**< 总共模拟次数*/
     double value;                   /**< UCB值 */
     int owner;                      /**< 节点所属下棋方 */
     LOC action;                     /**< 节点代表的动作 */
@@ -22,6 +22,7 @@ class Node
     Node(const Board &, int owner, Node *parent, int value, LOC l); /**< @brief 拓展子节点需要*/
     bool operator<(const Node &) const;                             /**< @brief 排序需要*/
     bool operator>(const Node &) const;                             /**< @brief 排序需要*/
+    void UCB(int n);
 };
 
 #endif // DOTS_AND_BOXS_NODE_H

@@ -4,6 +4,7 @@ project(dots_and_boxs)
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories(.)
+include_directories(C:/mingw64/include/python3.9)
 
 add_executable(dots_and_boxs
         board.cpp

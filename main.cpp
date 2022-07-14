@@ -29,7 +29,7 @@ int main()
                 // 占线
                 brd->occLine(-ai, change(t));
             }
-            UCT(*brd, ai);
+            UCT(brd, ai);
         }
         else if (message == "name?")
         {
@@ -42,7 +42,7 @@ int main()
             if (message == "black")
             {
                 ai = BLACK;
-                UCT(*brd, ai);
+                UCT(brd, ai);
             }
             else
             {

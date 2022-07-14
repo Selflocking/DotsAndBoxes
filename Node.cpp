@@ -3,14 +3,20 @@
 //
 
 #include "Node.h"
+#include <cmath>
 Node::Node()
 {
+    parent = nullptr;
+    win = 0;
+    total = 0;
+    action = {-1, -1};
 }
 Node::Node(const Board &brd, int own)
 {
     board = brd;
     owner = own;
     value = INF;
+    parent = nullptr;
 }
 Node::Node(const Board &brd, int own, Node *prt, int val)
 {
@@ -30,9 +36,14 @@ Node::Node(const Board &brd, int own, Node *prt, int val, LOC l)
     parent = prt;
     value = val;
     action = l;
-    board.occLine(owner,l);
+    win = total = 0;
+    board.occLine(owner, l);
 }
 bool Node::operator>(const Node &other) const
 {
     return this->value > other.value;
+}
+void Node::UCB(int n)
+{
+    value = (double)win / total + C * sqrt(2*log(n) / total);
 }
