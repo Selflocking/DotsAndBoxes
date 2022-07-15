@@ -35,7 +35,7 @@ Node::Node(const Board &brd, int own, Node *prt, LOC l)
     parent = prt;
     action.emplace_back(l);
     value = win = total = 0;
-    board.occLine(owner, l);
+    board.occLine(prt->owner, l);
 }
 bool Node::operator>(const Node &other) const
 {
