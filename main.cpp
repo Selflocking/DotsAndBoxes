@@ -33,7 +33,7 @@ int main()
         }
         else if (message == "name?")
         {
-            cout << "name stupidAI" << endl;
+            cout << "name UCT" << endl;
         }
         else if (message == "new")
         {

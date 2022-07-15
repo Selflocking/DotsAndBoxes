@@ -4,12 +4,17 @@ project(dots_and_boxs)
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories(.)
-include_directories(C:/mingw64/include/python3.9)
 
 add_executable(dots_and_boxs
+        main.cpp
+        define.h
         board.cpp
         board.h
-        define.h
         fun.cpp
-        main.cpp
-        Node.cpp Node.h UCT.cpp fun.h UCT.h)
+        fun.h
+        Node.cpp
+        Node.h
+        UCT.cpp
+        UCT.h)
+
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,1024000")

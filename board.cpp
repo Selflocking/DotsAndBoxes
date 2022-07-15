@@ -116,11 +116,11 @@ int Board::occLine(int owner, LOC l)
 {
     int res = 0;
     // 如果传进来的坐标不是边，输出
-    if (!isFreeLine(l))
-    {
-        cerr << "Board::occLine(LOC l): " << l.first << " " << l.second << "\n";
-        return 0;
-    }
+    //    if (!isFreeLine(l))
+    //    {
+    //        cerr << "Board::occLine(LOC l): " << l.first << " " << l.second << "\n";
+    //        return 0;
+    //    }
     if (map[l.first][l.second] == HENG)
     {
         if (l.first == 0)
@@ -324,18 +324,23 @@ Board &Board::operator=(const Board &other)
  */
 int Board::winner() const
 {
-    if(blackBox+whiteBox==25){
-        if(blackBox>whiteBox) return BLACK;
-        else return WHITE;
-    }else{
+    if (blackBox + whiteBox == 25)
+    {
+        if (blackBox > whiteBox)
+            return BLACK;
+        else
+            return WHITE;
+    }
+    else
+    {
         return EMPTY;
     }
-//    if (blackBox > 12)
-//        return BLACK;
-//    else if (whiteBox > 12)
-//        return WHITE;
-//    else
-//        return EMPTY;
+    //    if (blackBox > 12)
+    //        return BLACK;
+    //    else if (whiteBox > 12)
+    //        return WHITE;
+    //    else
+    //        return EMPTY;
 }
 
 /**
@@ -385,4 +390,100 @@ bool Board::isFreeLine(int i, int j) const
         return false;
     else
         return true;
+}
+void Board::traverseEdge(const std::function<void(LOC)> &f)
+{
+    for (int i = 1; i < 11; i += 2)
+    {
+        for (int j = 0; j < 11; j += 2)
+        {
+            if (isFreeLine(i, j))
+            {
+                f(LOC{i, j});
+            }
+        }
+    }
+    for (int i = 0; i < 11; i += 2)
+    {
+        for (int j = 1; j < 11; j += 2)
+        {
+            if (isFreeLine(i, j))
+            {
+                f(LOC{i, j});
+            }
+        }
+    }
+}
+bool Board::earnBox(LOC l)
+{
+    if (map[l.first][l.second] == HENG)
+    {
+        if (l.first == 0)
+        {
+            if (getFreedom(1, l.second) == 1)
+            {
+                return true;
+            }
+        }
+        else if (l.first == 10)
+        {
+            if (getFreedom(9, l.second) == 1)
+            {
+                return true;
+            }
+        }
+        else
+        {
+            if (getFreedom(l.first - 1, l.second) == 1)
+            {
+                return true;
+            }
+            if (getFreedom(l.first + 1, l.second) == 1)
+            {
+                return true;
+            }
+        }
+    }
+    else
+    {
+        if (l.second == 0)
+        {
+            if (getFreedom(l.first, 1) == 1)
+            {
+                return true;
+            }
+        }
+        else if (l.second == 10)
+        {
+            if (getFreedom(l.first, 9) == 1)
+            {
+                return true;
+            }
+        }
+        else
+        {
+            if (getFreedom(l.first, l.second - 1) == 1)
+            {
+                return true;
+            }
+            if (getFreedom(l.first, l.second + 1) == 1)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+Board::Board(const Board &board, const int &owner, const LOC &action)
+{
+    for (int i = 0; i < 11; ++i)
+    {
+        for (int j = 0; j < 11; ++j)
+        {
+            map[i][j] = board.map[i][j];
+        }
+    }
+    blackBox = board.blackBox;
+    whiteBox = board.whiteBox;
+    this->occLine(owner, action);
 }
