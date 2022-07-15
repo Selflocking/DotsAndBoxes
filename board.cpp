@@ -324,23 +324,23 @@ Board &Board::operator=(const Board &other)
  */
 int Board::winner() const
 {
-    if (blackBox + whiteBox == 25)
-    {
-        if (blackBox > whiteBox)
-            return BLACK;
-        else
-            return WHITE;
-    }
-    else
-    {
-        return EMPTY;
-    }
-    //    if (blackBox > 12)
-    //        return BLACK;
-    //    else if (whiteBox > 12)
-    //        return WHITE;
-    //    else
-    //        return EMPTY;
+    // if (blackBox + whiteBox == 25)
+    // {
+    //     if (blackBox > whiteBox)
+    //         return BLACK;
+    //     else
+    //         return WHITE;
+    // }
+    // else
+    // {
+    //     return EMPTY;
+    // }
+       if (blackBox > 12)
+           return BLACK;
+       else if (whiteBox > 12)
+           return WHITE;
+       else
+           return EMPTY;
 }
 
 /**

@@ -12,8 +12,9 @@ void Expand(Node *node)
     node->board.traverseEdge([&node](LOC l) {
         if (node->board.earnBox(l))
         {
-            Node t(node->board, -node->owner, node, l);
-            ExpandEx(&t);
+            Node * t = new Node(node->board, -node->owner, node, l);
+            ExpandEx(t);
+            delete t;
         }
         else
         {
@@ -24,16 +25,22 @@ void Expand(Node *node)
 
 void ExpandEx(Node *node)
 {
+    if(node->board.winner()!=EMPTY) return ;
+    
     node->board.traverseEdge([&node](LOC l) {
         if (node->board.earnBox(l))
         {
-            Node t(*node, l);
-            ExpandEx(&t);
-            cout << "Done" << endl;
+            Node * t = new Node(*node, l);
+            ExpandEx(t);
+            delete t;
         }
         else
         {
             node->parent->children.emplace_back(Node{*node, l});
+            if(node->parent->children[node->parent->children.size()-1].owner!=-node->parent->owner)
+            {
+                cout<<"error ExpandEx owner worng"<<endl;
+            }
         }
     });
 }
@@ -45,24 +52,40 @@ bool TreePolicy(Node *node)
         if (node->children.empty())
         {
             Expand(node);
-            //            std::thread t[node->children.size()];
-            //            for (int i = 0; i < node->children.size(); ++i)
-            //            {
-            //                t[i] = std::thread(play, &node->children[i]);
-            //            }
-            //            for (int i = 0; i < node->children.size(); ++i)
-            //            {
-            //                t[i].join();
-            //            }
-            for (auto &it : node->children)
+            int a = node->children.size()/THREAD;
+            int b = node->children.size()%THREAD;
+            for(int i = 0;i<a;i++)
             {
-                play(&it);
+                std::thread t[THREAD];
+                for(int j = 0;j<THREAD;j++)
+                {
+                    t[j] = std::thread(play, &node->children[i*THREAD+j]);
+                }
+                for(int j = 0;j<THREAD;j++)
+                {
+                    t[j].join();
+                }
             }
+            if(b!=0){
+                std::thread t[b];
+                for(int i = 0;i<b;i++)
+                {
+                    t[i] = std::thread(play, &node->children[a*THREAD+i]);
+                }
+                for(int i = 0;i<b;i++)
+                {
+                    t[i].join();
+                }
+            }
+            // for (auto &it : node->children)
+            // {
+            //     play(&it);
+            // }
             return false;
         }
         else
         {
-            double max = -1;
+            double max = -1e5;
             Node *next = &node->children[0];
             for (auto &i : node->children)
             {
@@ -96,26 +119,30 @@ vector<LOC> *UCTSearch(Board *board, int owner)
         //        }
     }
     // Result:
-    double max = -1;
-    double res_win = 0;
+    double max = -1e5;
+    double res_win = -1e5;
 
-    double max_win = -1;
-    double max_win_val = -1;
+    double max_win = -1e5;
+    double max_win_val = -1e5;
     Node *res;
-    cout << "children:" << root->children.size() << endl;
-    cout << "total" << root->total << endl;
+    cout << "children: " << root->children.size() << endl;
+    cout << "total: " << root->total << endl;
     for (auto &it : root->children)
     {
         it.UCB(root->total);
+        double wi = (double)it.win / it.total;;
+        if(it.action.size()>1){
+            cout<<"more action: "<<it.action.size()<<" "<<it.value<<" "<<wi<<endl;
+        }
         if (it.value > max)
         {
-            max = it.value;
-            res_win = (double)it.win / it.total;
-        }
-        if ((double)it.win / it.total > max_win)
-        {
             res = &it;
-            max_win = (double)it.win / it.total;
+            max = it.value;
+            res_win = wi;
+        }
+        if (wi > max_win)
+        {
+            max_win = wi;
             max_win_val = it.value;
         }
     }
@@ -139,7 +166,9 @@ void play(Node *node)
     node->board.traverseEdge([&lines](LOC l) { lines.emplace_back(l); });
     Node t;
     vector<LOC> lt;
-    while (++cnt < PLAY)
+    int BB = node->board.blackBox;
+    int WB = node->board.whiteBox;
+    while ((++cnt) < PLAY)
     {
         t = *node;
         lt = lines;
@@ -162,14 +191,26 @@ void play(Node *node)
             // 交换下棋方
             t.owner = -t.owner;
         }
-
-        // 计算胜利与否
-        if (t.board.winner() == node->owner)
-        {
-            ++win;
+        if(t.board.blackBox-BB>t.board.whiteBox-WB){
+            if(node->owner==BLACK){
+                ++win;
+            }else{
+                --win;
+            }
+        }else if(t.board.blackBox-BB<t.board.whiteBox-WB){
+            if(node->owner==WHITE){
+                ++win;
+            }else{
+                --win;
+            }
         }
+        // 计算胜利与否
+        // if (t.board.winner() == node->owner)
+        // {
+        //     ++win;
+        // }
     }
-    node->win = PLAY - win;
+    node->win =  - win;
     node->total = PLAY;
     BackUp(node, node->win, node->total);
 }
@@ -184,7 +225,7 @@ void BackUp(Node *node, int win, int total)
         if (node->owner == t->owner)
             node->win += win;
         else
-            node->win += total - win;
+            node->win += - win;
     }
 }
 void UCT(Board *board, int owner)
@@ -194,8 +235,10 @@ void UCT(Board *board, int owner)
     string res; // 引擎需要
     auto l = UCTSearch(board, owner);
 
-    if (l->empty())
+    if (l->empty()){
+        cout<<"no move"<<endl;
         return;
+    }
 
     for (auto &it : *l)
     {

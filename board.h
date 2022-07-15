@@ -1,5 +1,5 @@
 #include "define.h"
-
+#include<functional>
 #pragma once
 class Board
 {

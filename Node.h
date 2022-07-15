@@ -10,7 +10,7 @@ class Node
   public:
     Board board;                                             /**< 棋面 */
     Node *parent;                                            /**< 父节点 */
-    int win = 0;                                             /**< 胜利次数 */
+    double win = 0;                                             /**< 胜利次数 */
     int total = 0;                                           /**< 总共模拟次数*/
     double value = 0;                                            /**< UCB值 */
     int owner;                                               /**< 节点所属下棋方 */
