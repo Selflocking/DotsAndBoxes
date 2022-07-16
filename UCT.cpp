@@ -1,6 +1,4 @@
-//
-// Created by YunShu on 2022/7/13.
-//
+#include "UCT.h"
 #include "Node.h"
 #include "board.h"
 #include "define.h"
@@ -8,34 +6,173 @@
 #include <random>
 #include <thread>
 
-/**
- * @brief 随机演绎函数
- * @param node 表示开始演绎的节点
- * @return 返回胜率
- * @todo 目前的演绎强制演绎一定次数，需要修正，避免重复演绎和无效演绎
- */
-double play(Node *node)
+Node *root;
+void Expand(Node *node)
 {
-    int win = 0;       // 统计胜利次数
-    int cnt = -1;      // 统计演绎次数
-    vector<LOC> lines; // 存放目前节点所有空边
-    for (int i = 0; i < 11; ++i)
-    {
-        for (int j = 0; j < 11; ++j)
+    node->board.traverseEdge([&node](LOC l) {
+        if (node->board.earnBox(l))
         {
-            if (node->board.isFreeLine({i, j}))
+            Node * t = new Node(node->board, -node->owner, node, l);
+            ExpandEx(t);
+            delete t;
+        }
+        else
+        {
+            node->children.emplace_back(Node{node->board, -node->owner, node, l});
+        }
+    });
+}
+
+void ExpandEx(Node *node)
+{
+    if(node->board.winner()!=EMPTY) return ;
+    
+    node->board.traverseEdge([&node](LOC l) {
+        if (node->board.earnBox(l))
+        {
+            Node * t = new Node(*node, l);
+            ExpandEx(t);
+            delete t;
+        }
+        else
+        {
+            node->parent->children.emplace_back(Node{*node, l});
+            if(node->parent->children[node->parent->children.size()-1].owner!=-node->parent->owner)
             {
-                lines.emplace_back(LOC{i, j});
+                cout<<"error ExpandEx owner worng"<<endl;
             }
         }
-    }
+    });
+}
 
-    Node t = *node;         // 复制节点
-    vector<LOC> lt = lines; // 复制空边
-    while (++cnt < SEARCH)  // 开始演绎
+bool TreePolicy(Node *node)
+{
+    while (node->board.winner() == EMPTY)
     {
+        if (node->children.empty())
+        {
+            Expand(node);
+            int a = node->children.size()/THREAD;
+            int b = node->children.size()%THREAD;
+            for(int i = 0;i<a;i++)
+            {
+                std::thread t[THREAD];
+                for(int j = 0;j<THREAD;j++)
+                {
+                    t[j] = std::thread(play, &node->children[i*THREAD+j]);
+                }
+                for(int j = 0;j<THREAD;j++)
+                {
+                    t[j].join();
+                }
+            }
+            if(b!=0){
+                std::thread t[b];
+                for(int i = 0;i<b;i++)
+                {
+                    t[i] = std::thread(play, &node->children[a*THREAD+i]);
+                }
+                for(int i = 0;i<b;i++)
+                {
+                    t[i].join();
+                }
+            }
+            // for (auto &it : node->children)
+            // {
+            //     play(&it);
+            // }
+            return false;
+        }
+        else
+        {
+            double max = -1e5;
+            Node *next = &node->children[0];
+            for (auto &i : node->children)
+            {
+                i.UCB(root->total);
+                if (i.total == 0)
+                    cout << "thread dont run" << endl;
+                if (i.value > max)
+                {
+                    max = i.value;
+                    next = &i;
+                }
+            }
+            node = next;
+        }
+    }
+    return true;
+}
+
+vector<LOC> *UCTSearch(Board *board, int owner)
+{
+    root = new Node(*board, owner);
+
+    time_t begin = time(nullptr);
+    while (time(nullptr) - begin < TIME)
+    {
+        //        for (int i = 0; i < EXPAND; ++i)
+
+        if (TreePolicy(root))
+            break;
+        //                goto Result;
+        //        }
+    }
+    // Result:
+    double max = -1e5;
+    double res_win = -1e5;
+
+    double max_win = -1e5;
+    double max_win_val = -1e5;
+    Node *res;
+    cout << "children: " << root->children.size() << endl;
+    cout << "total: " << root->total << endl;
+    for (auto &it : root->children)
+    {
+        it.UCB(root->total);
+        double wi = (double)it.win / it.total;;
+        if(it.action.size()>1){
+            cout<<"more action: "<<it.action.size()<<" "<<it.value<<" "<<wi<<endl;
+        }
+        if (it.value > max)
+        {
+            res = &it;
+            max = it.value;
+            res_win = wi;
+        }
+        if (wi > max_win)
+        {
+            max_win = wi;
+            max_win_val = it.value;
+        }
+    }
+    cout << "Max UCB value: " << max << " " << res_win * 100 << "%" << endl;
+    cout << "Max win: " << max_win_val << " " << max_win * 100 << "%" << endl;
+    auto bak = new vector<LOC>(res->action);
+    delete root;
+    return bak;
+}
+
+double UCB(int win, int total, int n)
+{
+    return (double)win / total + C * sqrt(2 * log(n) / total);
+}
+
+void play(Node *node)
+{
+    int win = 0;
+    int cnt = -1;
+    vector<LOC> lines;
+    node->board.traverseEdge([&lines](LOC l) { lines.emplace_back(l); });
+    Node t;
+    vector<LOC> lt;
+    int BB = node->board.blackBox;
+    int WB = node->board.whiteBox;
+    while ((++cnt) < PLAY)
+    {
+        t = *node;
+        lt = lines;
         // 置乱边集
-        srand(time(nullptr));
         std::shuffle(lt.begin(), lt.end(), std::mt19937(std::random_device()()));
 
         // 当没有下完时，轮流着棋
@@ -54,131 +191,61 @@ double play(Node *node)
             // 交换下棋方
             t.owner = -t.owner;
         }
-
+        if(t.board.blackBox-BB>t.board.whiteBox-WB){
+            if(node->owner==BLACK){
+                ++win;
+            }else{
+                --win;
+            }
+        }else if(t.board.blackBox-BB<t.board.whiteBox-WB){
+            if(node->owner==WHITE){
+                ++win;
+            }else{
+                --win;
+            }
+        }
         // 计算胜利与否
-        if (t.board.winner() == node->owner)
-        {
-            ++win;
-        }
-
-        // 重新复制节点和边集
-        t = *node;
-        lt = lines;
+        // if (t.board.winner() == node->owner)
+        // {
+        //     ++win;
+        // }
     }
-
-    // 回溯，将当前胜利次数和演绎总数传递给父节点
-    node->parent->n += SEARCH;
-    node->parent->win += win;
-    return 1.0 * win / SEARCH;
+    node->win =  - win;
+    node->total = PLAY;
+    BackUp(node, node->win, node->total);
 }
 
-/**
- * @brief 递归拓展节点，利用宏DEEP控制拓展最大深度
- * @param node 需要被拓展的节点
- * @param deep 目前所在深度
- */
-void NodeSearch(Node &node, int deep)
+void BackUp(Node *node, int win, int total)
 {
-    // 如果达到搜索深度，开始演绎
-    if (deep >= DEEP)
+    Node *t = node;
+    while (node->parent != nullptr)
     {
-        play(&node);
-        return;
-    }
-
-    // 如果没有达到搜索深度，继续拓展节点
-    for (int i = 0; i < 11; ++i)
-    {
-        for (int j = 0; j < 11; ++j)
-        {
-            if (node.board.isFreeLine({i, j}))
-            {
-                node.children.emplace_back(Node{node.board, -node.owner, &node, INF, LOC{i, j}});
-            }
-        }
-    }
-
-    // 开始递归，同时回溯，将当前节点胜利次数和演绎总数传递给父节点
-    for (auto &i : node.children)
-    {
-        NodeSearch(i, deep + 1);
-        node.win += i.win;
-        node.n += i.n;
+        node = node->parent;
+        node->total += total;
+        if (node->owner == t->owner)
+            node->win += win;
+        else
+            node->win += - win;
     }
 }
-
-/**
- * @brief UCT搜索函数，做一些搜索的开始工作，调用NodeSearch()开始递归拓展
- * @param board 搜索开始棋面
- * @param owner 下棋方
- * @return UCT认为最佳的着棋点
- * @warning 目前并没有完全实现UCT，仅仅使用演绎胜率作为参考
- */
-LOC UCTSearch(Board board, int owner)
-{
-    Node root(board, owner); // 使用当前局面建立根节点
-    for (int i = 0; i < 11; ++i)
-    {
-        for (int j = 0; j < 11; ++j)
-        {
-            if (board.isFreeLine({i, j})) // 寻找空边，建立子节点
-            {
-                root.children.emplace_back(Node{board, -owner, &root, INF, LOC{i, j}});
-            }
-        }
-    }
-
-    int max = 0;
-    LOC res(-1, -1);
-
-    // 多线程，利用宏THREAD控制最大线程数
-    // 递归拓展子节点
-    for (int i = 0; i < root.children.size() / THREAD; ++i)
-    {
-        std::thread t[THREAD];
-        for (int j = i * THREAD; j < i * THREAD + THREAD && j < root.children.size(); ++j)
-        {
-            t[j % THREAD] = std::thread(NodeSearch, std::ref(root.children[j]), 1);
-        }
-        for (int j = i * THREAD; j < i * THREAD + THREAD && j < root.children.size(); ++j)
-        {
-            t[j % THREAD].join();
-        }
-    }
-
-    // 遍历所以子节点，选取最优子节点
-    for (const auto &i : root.children)
-    {
-        if (i.win >= max)
-        {
-            max = i.win;
-            res = i.action;
-        }
-    }
-    return res;
-}
-
-/**
- * @brief UCT开始函数，调用UCTSearch()
- * @param board 目前棋面
- * @param owner 下棋方
- */
-void UCT(Board &board, int owner)
+void UCT(Board *board, int owner)
 {
     time_t begin = time(nullptr); // 记录开始时间
 
     string res; // 引擎需要
-    LOC l;      // 多次下棋需要
+    auto l = UCTSearch(board, owner);
 
-    do
+    if (l->empty()){
+        cout<<"no move"<<endl;
+        return;
+    }
+
+    for (auto &it : *l)
     {
-        l = UCTSearch(board, owner); // 得到一个最佳着棋点
-        if (l.first == -1)           // 如果棋面已经结束
-            return;
-        res += change(l); // 转换成协议可以理解的字符串
-    } while (
-        board.occLine(owner, l)); // 占领这条线，occline()返回这条线占领的格子的数量，如果占领了某格子，需要接着搜索
-
+        board->occLine(owner, it);
+        res += change(it);
+    }
+    delete l;
     time_t cost = time(nullptr) - begin; // 计算计算时间
     if (cost > 60)
     {
