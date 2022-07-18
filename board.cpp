@@ -33,21 +33,6 @@ Board::Board()
 }
 
 /**
- * @brief Construct a new Board:: Board object
- *
- * @param other
- */
-Board::Board(const Board &other)
-{
-    for (int i = 0; i < 11; ++i)
-        for (int j = 0; j < 11; ++j)
-            map[i][j] = other.map[i][j];
-
-    whiteBox = other.whiteBox;
-    blackBox = other.blackBox;
-}
-
-/**
  * @brief 获得一个格子的自由度，自由度即格子周围未被占领的边的数量
  *
  * @param x 横坐标
@@ -79,29 +64,6 @@ int Board::getFreedom(LOC l)
     return getFreedom(l.first, l.second);
 }
 
-/**
- * @brief 打印棋盘，暂时没用
- *
- */
-void Board::printBoard()
-{
-    printf("O(0, 1)O(0 ,3)O(0 ,5)O(0,7 )O(0, 9)O\n"
-           "1      1      1      1      1      1\n"
-           "0      2      4      6      8     10\n"
-           "O(2, 1)O(2, 3)O(2, 5)O(2 ,7)O(2, 9)O\n"
-           "3      3      3      3      3      3\n"
-           "0      2      4      6      8     10\n"
-           "O(4, 1)O(4 ,3)O(4, 5)O(4 ,7)O(4, 9)O\n"
-           "5      5      5      5      5      5\n"
-           "0      2      4      6      8     10\n"
-           "O(6, 1)O(6, 3)O(6, 5)O(6 ,7)O(6, 9)O\n"
-           "7      7      7      7      7      7\n"
-           "0      2      4      6      8     10\n"
-           "O (8,1)O(8 ,3)O(8, 5)O(8, 7)O(8 ,9)O\n"
-           "9      9      9      9      9      9\n"
-           "0      2      4      6      8     10\n"
-           "O(10,1)O(10,3)O(10,5)O(10,7)O(10,9)O\n");
-}
 
 /**
  * @brief 占线
@@ -112,13 +74,13 @@ void Board::printBoard()
  * @param l 代表要占的线的坐标
  * @return int 返回的是这条线产生的被占了的格子的数目
  */
-int Board::occLine(int owner, LOC l)
+int Board::move(int owner, LOC l)
 {
     int res = 0;
     // 如果传进来的坐标不是边，输出
     //    if (!isFreeLine(l))
     //    {
-    //        cerr << "Board::occLine(LOC l): " << l.first << " " << l.second << "\n";
+    //        cerr << "Board::move(LOC l): " << l.first << " " << l.second << "\n";
     //        return 0;
     //    }
     if (map[l.first][l.second] == HENG)
@@ -185,8 +147,6 @@ int Board::occLine(int owner, LOC l)
             }
         }
     }
-    // 更新棋盘中长链，双交等
-    //  statusUpdates(l);
     map[l.first][l.second] = OCCLINE;
     if (owner == BLACK)
         blackBox += res;
@@ -197,14 +157,11 @@ int Board::occLine(int owner, LOC l)
 
 /**
  * @brief 吃C型格，
- * 如果要吃完棋盘上的C型格
- * LOC l = {1,1};
- * whlie(l.first!=-1||l.second!=-1) l = brd.eatCBoxs(owner,l);
  *
  * @param owner 代表此时的下棋方
  * @return LOC 返回一个C型格的坐标，找不到返回{-1，-1}
  */
-LOC Board::eatCBoxs(int owner)
+LOC Board::eatCBox(int owner)
 {
     for (int i = 1; i < 11; i += 2)
     {
@@ -214,22 +171,22 @@ LOC Board::eatCBoxs(int owner)
             {
                 if (map[i - 1][j] != OCCLINE)
                 {
-                    occLine(owner, {i - 1, j});
+                    move(owner, {i - 1, j});
                     return {i - 1, j};
                 }
                 else if (map[i + 1][j] != OCCLINE)
                 {
-                    occLine(owner, {i + 1, j});
+                    move(owner, {i + 1, j});
                     return {i + 1, j};
                 }
                 else if (map[i][j + 1] != OCCLINE)
                 {
-                    occLine(owner, {i, j + 1});
+                    move(owner, {i, j + 1});
                     return {i, j + 1};
                 }
                 else
                 {
-                    occLine(owner, {i, j - 1});
+                    move(owner, {i, j - 1});
                     return {i, j - 1};
                 }
             }
@@ -246,12 +203,21 @@ bool Board::isFreeLine(LOC l) const
     else
         return true;
 }
+
+bool Board::isFreeLine(int i, int j) const
+{
+    if (map[i][j] != SHU && map[i][j] != HENG)
+        return false;
+    else
+        return true;
+}
+
 /**
  * @brief 判断一个坐标是否会造成C型格
  *
  * @return ture表示会造成C型格
  */
-bool Board::makeCBox(LOC l)
+bool Board::ifMakeCBox(LOC l)
 {
     if (map[l.first][l.second] == HENG)
     {
@@ -303,46 +269,6 @@ bool Board::makeCBox(LOC l)
     }
 }
 
-Board &Board::operator=(const Board &other)
-{
-    for (int i = 0; i < 11; ++i)
-    {
-        for (int j = 0; j < 11; ++j)
-        {
-            this->map[i][j] = other.map[i][j];
-        }
-    }
-    blackBox = other.blackBox;
-    whiteBox = other.whiteBox;
-    return *this;
-}
-
-/**
- * @brief 判断赢家
- *
- * @return 如果黑方胜利，返回BLACK，白方胜利返回WHITE，目前无胜方返回EMPTY
- */
-int Board::winner() const
-{
-    // if (blackBox + whiteBox == 25)
-    // {
-    //     if (blackBox > whiteBox)
-    //         return BLACK;
-    //     else
-    //         return WHITE;
-    // }
-    // else
-    // {
-    //     return EMPTY;
-    // }
-       if (blackBox > 12)
-           return BLACK;
-       else if (whiteBox > 12)
-           return WHITE;
-       else
-           return EMPTY;
-}
-
 /**
  * @brief 打印当前局面
  *
@@ -361,6 +287,7 @@ void Board::print()
         cout << "\n";
     }
 }
+
 void Board::traverseEdge(std::function<void(int i, int j)> const &f)
 {
     for (int i = 1; i < 11; i += 2)
@@ -384,13 +311,7 @@ void Board::traverseEdge(std::function<void(int i, int j)> const &f)
         }
     }
 }
-bool Board::isFreeLine(int i, int j) const
-{
-    if (map[i][j] != SHU && map[i][j] != HENG)
-        return false;
-    else
-        return true;
-}
+
 void Board::traverseEdge(const std::function<void(LOC)> &f)
 {
     for (int i = 1; i < 11; i += 2)
@@ -414,7 +335,14 @@ void Board::traverseEdge(const std::function<void(LOC)> &f)
         }
     }
 }
-bool Board::earnBox(LOC l)
+
+/**
+ * @brief 判断是否赢得格子
+ *
+ * @param l 需要判断的边的坐标
+ * @return 如果传进来的l占据了格子，返回true，否则返回false
+ */
+bool Board::ifEarnBox(LOC l)
 {
     if (map[l.first][l.second] == HENG)
     {
@@ -474,16 +402,31 @@ bool Board::earnBox(LOC l)
     }
     return false;
 }
-Board::Board(const Board &board, const int &owner, const LOC &action)
+
+/**
+ * @brief 判断棋局是否结束
+ *
+ * @return 如果游戏已经结束，返回true，否则返回false
+ */
+bool Board::ifEnd() const
 {
-    for (int i = 0; i < 11; ++i)
-    {
-        for (int j = 0; j < 11; ++j)
-        {
-            map[i][j] = board.map[i][j];
-        }
-    }
-    blackBox = board.blackBox;
-    whiteBox = board.whiteBox;
-    this->occLine(owner, action);
+    if (blackBox > 12||whiteBox > 12)
+        return true;
+    else
+        return false;
+}
+
+/**
+ * @brief 判断赢家
+ *
+ * @return 如果黑方胜利，返回BLACK，白方胜利返回WHITE，目前无胜方返回EMPTY
+ */
+int Board::getWinner() const
+{
+       if (blackBox > 12)
+           return BLACK;
+       else if (whiteBox > 12)
+           return WHITE;
+       else
+           return EMPTY;
 }
