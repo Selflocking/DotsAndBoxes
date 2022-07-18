@@ -42,6 +42,8 @@ constexpr int SEARCH = 100; // 搜索次数限制
 constexpr double DEEP = 3;  // 拓展深度
 constexpr int THREAD = 12;  // 线程最大限制
 
+constexpr double C = 1;    //UCB 常数
+
 // 一些常用的
 // 不适用using namespace std,是为了防止和std空间里的命名冲突
 using LOC = std::pair<int, int>;

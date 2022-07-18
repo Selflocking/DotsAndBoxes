@@ -6,12 +6,15 @@ set(CMAKE_CXX_STANDARD 17)
 include_directories(.)
 
 add_executable(dots_and_boxs
+        main.cpp
+        define.h
         board.cpp
         board.h
-        define.h
         assess.cpp
         assess.h
         fun.cpp
-        fun.h 
-        main.cpp
-        UCT.cpp UCT.h  )
+        fun.h
+        Node.cpp
+        Node.h
+        UCT.cpp
+        UCT.h)

@@ -29,11 +29,11 @@ int main()
                 // 占线
                 brd->occLine(-ai, change(t));
             }
-            UCT(*brd, ai);
+            UCT(brd, ai);
         }
         else if (message == "name?")
         {
-            cout << "name stupidAI" << endl;
+            cout << "name UCT" << endl;
         }
         else if (message == "new")
         {
@@ -42,7 +42,7 @@ int main()
             if (message == "black")
             {
                 ai = BLACK;
-                UCT(*brd, ai);
+                UCT(brd, ai);
             }
             else
             {
