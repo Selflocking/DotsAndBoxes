@@ -10,11 +10,11 @@ add_executable(dots_and_boxs
         define.h
         board.cpp
         board.h
+        assess.cpp
+        assess.h
         fun.cpp
         fun.h
         Node.cpp
         Node.h
         UCT.cpp
         UCT.h)
-
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,1024000")
