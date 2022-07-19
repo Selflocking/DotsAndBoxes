@@ -27,7 +27,7 @@ int main()
                 t += message[i + 1];
                 t += message[i + 2];
                 // 占线
-                brd->occLine(-ai, change(t));
+                brd->move(-ai, change(t));
             }
             UCT(brd, ai);
         }
