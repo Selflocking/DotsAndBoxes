@@ -8,7 +8,7 @@
 3. `win`+`r`输入`cmd`打开命令行，输入`gcc -v`，如果输出的信息中`COLLECT_LTO_WRAPPER=`大致为你复制的路径即为成功。
 ### 不使用CMake
 #### VS Code
-1. git clone https://gitee.com/YunShu007/dots-and-boxs.git
+1. git clone https://gitee.com/YunShu007/dots-and-boxes.git
 2. 进入项目目录，新建`build`文件夹，将`3rdparty/SFML/bin`文件夹中的`dll`文件复制到刚刚新建的`build`文件夹中, 将`res`目录复制进`build`目录中
 3. 使用VS Code打开项目，请保证VSCode仅打开项目文件夹，而不是打开项目文件夹的父文件夹
 4. 新建`.vscode`文件夹,在`.vscode`里新建文件`tasks.json`和`launch.json`.
@@ -45,7 +45,7 @@ tasks.json:
 }
 ```
 #### 命令行编译
-1. git clone https://gitee.com/YunShu007/dots-and-boxs.git
+1. git clone https://gitee.com/YunShu007/dots-and-boxes.git
 2. 进入项目目录，新建`build`文件夹，将`3rdparty/SFML/bin`文件夹中的`dll`文件复制到刚刚新建的`build`文件夹中，将`res`目录复制进`build`目录中
 3. 回到项目目录，打开命令行执行
 ```bash
@@ -55,13 +55,13 @@ g++ src/*.cpp src/AI/*.cpp -o build/game.exe -I ./3rdparty/SFML/include -L./3rdp
 ### 使用CMake (推荐)
 首先安装[CMake](https://github.com/Kitware/CMake/releases/download/v3.24.0-rc4/cmake-3.24.0-rc4-windows-x86_64.msi)
 #### VS Code
-1. git clone https://gitee.com/YunShu007/dots-and-boxs.git
+1. git clone https://gitee.com/YunShu007/dots-and-boxes.git
 2. 安装[CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools)插件
 3. 重启VS Code
 4. 重新打开会让你选择工具,选择`GCC 11.2.0 X86_64-w64-mingw32-make`
 5. 如果上一步不小心选错，按`Ctrl`+`Shift`+`P`打开指令栏，输入kit,点击`CMake: 选择工具包`重新选择
 #### Clion
-1. 打开Clion，选择从VCS导入，输入https://gitee.com/YunShu007/dots-and-boxs.git
+1. 打开Clion，选择从VCS导入，输入https://gitee.com/YunShu007/dots-and-boxes.git
 2. 等待加载，完成后会弹出配置cmake的窗口，直接点确定即可。
 
 > Clion自带Cmake和符合要求的MinGW,所以可以开箱即用

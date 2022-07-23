@@ -4,8 +4,8 @@
 #include <random>
 #include <thread>
 
-#ifndef DOTS_AND_BOXS_UCT_H
-#define DOTS_AND_BOXS_UCT_H
+#ifndef DOTS_AND_BOXES_UCT_H
+#define DOTS_AND_BOXES_UCT_H
 
 constexpr int TIME = 30;   // 时间限制
 constexpr int THREAD = 12; // 线程最大限制
