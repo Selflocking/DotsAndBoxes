@@ -1,7 +1,7 @@
 #include "board.h"
 #include "define.h"
-#ifndef DOTS_AND_BOXS_NODE_H
-#define DOTS_AND_BOXS_NODE_H
+#ifndef DOTS_AND_BOXES_NODE_H
+#define DOTS_AND_BOXES_NODE_H
 
 constexpr int INF = 1e9; /**< 无穷大 */
 
@@ -25,4 +25,4 @@ class Node
     void expand();                     /**< @brief 展开节点*/
 };
 
-#endif // DOTS_AND_BOXS_NODE_H
+#endif // DOTS_AND_BOXES_NODE_H
