@@ -11,8 +11,8 @@ void UCT(Board *board, int player)
     system("pause");
     string res;        // 引擎需要
     vector<LOC> moves; // 可行的位置
-    moves.emplace_back(LOC{0,1});
-//    UCTSearch(*board, player, moves);
+    // moves.emplace_back(LOC{0,1});
+   UCTSearch(*board, player, moves);
     if (moves.empty())
     {
         cout << "Game Over" << endl;

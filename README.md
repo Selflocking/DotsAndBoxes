@@ -65,21 +65,9 @@ g++ src/*.cpp src/AI/*.cpp -o build/game.exe -I ./3rdparty/SFML/include -L./3rdp
 2. 等待加载，完成后会弹出配置cmake的窗口，直接点确定即可。
 
 > Clion自带Cmake和符合要求的MinGW,所以可以开箱即用
-## 详细介绍
-### 各文件功能
-`board.h` 棋盘类
-
-`board.cpp` 棋盘类的具体实现
-
-`define.h` 存放常用宏定义
-
-`fun.h` 存放常用函数
-
-`sutpidAI.h` 准备存放AI相关代码
-
-`main.cpp` 主函数所在文件
-
-`.clang-format` 格式化配置文件
+## 开发指南
+### AI设计
+入口函数为`void UCT(Board *board, int player)`,在此函数中更改AI逻辑
 
 ### 棋盘
 棋盘是11x11大小,有点(DOT),横线(HENG),竖线(SHU),被占据的线(OCCLINE),格子(BOX),先手黑方格子(BLACK_BOX),后手白方格子(WHITE_BOX).
