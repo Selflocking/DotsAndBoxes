@@ -2,7 +2,7 @@
 *.exe
 .idea/
 build/
-cmake*/
+cmake-build-*/
 .cache/
 chess*.txt
 Doxyfile
