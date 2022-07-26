@@ -25,7 +25,7 @@ BoxBoard::BoxBoard(Board NewB)
     }
 }
 
-BoxBoard::BoxBoard(int m[LEN][LEN], int step)
+BoxBoard::BoxBoard(int m[LEN][LEN])
 {
     for (int i = 0; i < LEN; i++)
     {
@@ -51,6 +51,83 @@ void BoxBoard::resetChainsInfo() //重置链与格的信息，不使用0号空�
         Chains[i].Type = NotDefine;
         Chains[i].ConditionOfPreCircle = false; //预备环的先决条件
     }
+}
+
+int BoxBoard::getFilterMoves(LOC Moves[60])
+{
+	bool st[LEN][LEN]={0};
+
+	int MoveNum = 0;
+	for (int y = 0; y < LEN; y++)
+	{
+		for (int x = 0; x < LEN; x++)
+		{
+			if (map[x][y] == HENG||map[x][y] == SHU)//若为空白边
+			{
+				int BoardSave[LEN][LEN];
+				boardCopy(map, BoardSave);	//保存一下
+				move(BLACK,{x, y});			//玩家模拟走一步试试
+
+				if (isOdd(x) && isEven(y))//X奇数Y偶数，横行
+				{
+					if (y == 0)
+					{
+						if (!getLongCTypeBoxBool(x, y + 1))//如果下面的那个格子没问题的话，这个招法也没问题
+						{
+								Moves[MoveNum]={x, y};
+								MoveNum++;//总数目自增
+						}
+					}
+					else if (y == LEN - 1)
+					{
+						if (!getLongCTypeBoxBool(x, y - 1))//如果上面的那个格子没问题的话，这个招法也没问题
+						{
+                               Moves[MoveNum]={x, y};
+							   MoveNum++;//总数目自增
+						}
+					}
+					else
+					{
+						if (!getLongCTypeBoxBool(x, y + 1) && !getLongCTypeBoxBool(x, y - 1))//如果上下的格子都没问题的话，这个招法也没问题
+						{
+                                Moves[MoveNum]={x, y};
+							    MoveNum++;//总数目自增
+						}
+					}
+				}
+				else//竖行
+				{
+					if (x == 0)
+					{
+						if (!getLongCTypeBoxBool(x + 1, y))//如果右边的那个格子没问题的话，这个招法也没问题
+						{
+								Moves[MoveNum]={x, y};
+							    MoveNum++;//总数目自增
+						}
+					}
+					else if (x == LEN - 1)
+					{
+						if (!getLongCTypeBoxBool(x - 1, y))//如果左边的那个格子没问题的话，这个招法也没问题
+						{
+                                Moves[MoveNum]={x, y};
+							    MoveNum++;//总数目自增
+						}
+					}
+					else
+					{
+						if (!getLongCTypeBoxBool(x + 1, y) && !getLongCTypeBoxBool(x - 1, y))//如果左右两边的格子都没问题的话，这个招法也没问题
+						{
+                                Moves[MoveNum]={x, y};
+							    MoveNum++;//总数目自增
+						}
+					}
+				}
+				setBoard(BoardSave);			//还原
+			}
+		}
+	}
+
+	return MoveNum;
 }
 
 void BoxBoard::searchingFromBox(LOC BoxLoc) //从一个格出发，注册他的所有派生链，ChainPlus应在没有短链时启用
@@ -535,4 +612,449 @@ void BoxBoard::registerDeadChain(LOC FreeBoxLoc, LOC FirstLoc)
     }
 
     cout << "完成registerDeadChain" << endl;
+}
+
+bool BoxBoard::captualShortestChain(int LatterPlayer)
+{
+	defineAllChains(false);
+
+	//先找到最短的那条长链/环
+	int Least = 0;
+	int LeastBoxNum = BOXNUM;//假设最短的链有25个
+	for (int i = 1; i < BOXNUM; i++)
+	{
+		if (Chains[i].Type == LongChain || Chains[i].Type == Circle)
+		{
+			if (Chains[i].ChainBoxNum < LeastBoxNum)
+			{
+				LeastBoxNum = Chains[i].ChainBoxNum;
+				Least = i;
+			}
+		}
+	}
+	if (Least == 0)
+		return false;
+
+
+	//先手先占领任意两个格子之间的边
+	bool Finish = false;
+	for (int y = 1; y <= BOXLEN; y++)
+	{
+		for (int x = 1; x <= BOXLEN; x++)
+		{
+			if (Boxes[x][y].BelongingChainNum == Least&&!Finish)
+			{
+
+				int Dir[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+				int bx = x * 2 - 1;
+				int by = y * 2 - 1;
+
+				for (int n = 0; n < 4; n++)
+				{
+					int ex = bx + Dir[n][0];
+					int ey = by + Dir[n][1];
+					int nbx = x + Dir[n][0];
+					int nby = y + Dir[n][1];
+					if ((map[ex][ey] == HENG||map[ex][ey]==SHU)&&Boxes[nbx][nby].BelongingChainNum == Least)//找到两个格子交叉的那个格子
+					{
+						move(-LatterPlayer,{ex,ey});
+						Finish = true;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	//后手占领这条链所有其他格子空余的边
+	for (int y = 1; y <= BOXLEN; y++)
+	{
+		for (int x = 1; x <= BOXLEN; x++)
+		{
+			if (Boxes[x][y].BelongingChainNum == Least)
+			{
+				int Dir[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+				int bx = x * 2 - 1;
+				int by = y * 2 - 1;
+				for (int n = 0; n < 4; n++)
+				{
+					int ex = bx + Dir[n][0];
+					int ey = by + Dir[n][1];
+					if (map[ex][ey] == HENG||map[ex][ey]==SHU)
+					{
+						move(LatterPlayer,{ex,ey});
+						break;
+					}
+				}
+				//占据结束，刷新链信息，结束。
+				Boxes[x][y].BelongingChainNum = 0;
+			}
+		}
+	}
+	//结束
+	inheritChain(EMPTY, Least);
+	defineBoxesType();
+	return true;
+}
+
+LOC BoxBoard::getOpenShortestChainLoc()
+{
+	defineAllChains(false);
+
+	//先找到最短的那条长链/环
+	int Least = 0;
+	int LeastBoxNum = BOXNUM;//假设最短的链有25个
+	for (int i = 1; i < BOXNUM; i++)
+	{
+		if (Chains[i].Type == LongChain)
+		{
+			if (Chains[i].ChainBoxNum < LeastBoxNum)
+			{
+				LeastBoxNum = Chains[i].ChainBoxNum;
+				Least = i;
+			}
+		}
+	}
+
+
+	//先手先占领任意两个格子之间的边
+	for (int y = 1; y <= BOXLEN; y++)
+	{
+		for (int x = 1; x <= BOXLEN; x++)
+		{
+			if (Boxes[x][y].BelongingChainNum == Least)
+			{
+
+				int Dir[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+				int bx = x * 2 - 1;
+				int by = y * 2 - 1;
+
+				for (int n = 0; n < 4; n++)
+				{
+					int ex = bx + Dir[n][0];
+					int ey = by + Dir[n][1];
+					int nbx = x + Dir[n][0];
+					int nby = y + Dir[n][1];
+					if ((map[ex][ey] == HENG||map[ex][ey]==SHU)&&Boxes[nbx][nby].BelongingChainNum == Least)//找到两个格子交叉的那个格子
+					{
+						LOC k;
+						k={ex, ey};
+						return k;
+					}
+				}
+			}
+		}
+	}
+	LOC k;
+	k={0, 0};
+	return k;
+}
+
+LOC BoxBoard::openPolicy(Board &CB)//打开策略
+{
+     BoxBoard test=CB;
+	 LOC res={-1,-1};
+
+	 defineAllChains(false);
+	 int LCnum=0;//长链
+	 int Cnum=0;//环
+	 int LC3num=0;//3格长链
+	 for(int i=1;i<25;i++)
+	 {
+         if(Chains[i].Type==Circle) Cnum++;
+		 if(Chains[i].Type==LongChain)
+		 {
+			LCnum++;
+			if(Chains[i].ChainBoxNum==3) LC3num++;
+		 }
+	 }
+	 
+	 //打开策略
+	 if(LCnum==0&&Cnum!=0) //如果G不含长链，应开启最短的环；
+	   res=getOpenShortestCircleLoc();
+	 else if(LCnum!=0&&Cnum==0) //如果G不含环，应开启最短的链
+	   res=getOpenShortestChainLoc();
+	 else if(LCnum!=0&&Cnum!=0&&LC3num==0) //如果G含环但是不包含3-链，应开启最短的环
+	   res=getOpenShortestCircleLoc();
+	 else if(LCnum!=0&&Cnum!=0&&LC3num!=0)
+	   res=getOpen3ChainLoc();
+	
+	return res;
+}
+
+LOC BoxBoard::getOpenShortestCircleLoc()//获得待打开的最短的环的坐标
+{
+	defineAllChains(false);
+
+	//先找到最短的那条环
+	int Least = 0;
+	int LeastBoxNum = BOXNUM;//假设最短的环长为25
+	for (int i = 1; i < BOXNUM; i++)
+	{
+		if (Chains[i].Type == Circle)
+		{
+			if (Chains[i].ChainBoxNum < LeastBoxNum)
+			{
+				LeastBoxNum = Chains[i].ChainBoxNum;
+				Least = i;
+			}
+		}
+	}
+
+	//先手先占领任意两个格子之间的边
+	for (int y = 1; y <= BOXLEN; y++)
+	{
+		for (int x = 1; x <= BOXLEN; x++)
+		{
+			if (Boxes[x][y].BelongingChainNum == Least)
+			{
+
+				int Dir[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+				int bx = x * 2 - 1;
+				int by = y * 2 - 1;
+
+				for (int n = 0; n < 4; n++)
+				{
+					int ex = bx + Dir[n][0];
+					int ey = by + Dir[n][1];
+					int nbx = x + Dir[n][0];
+					int nby = y + Dir[n][1];
+					if ((map[ex][ey]==HENG||map[ex][ey]==SHU)&&Boxes[nbx][nby].BelongingChainNum == Least)//找到两个格子共用的那条边
+					{
+						LOC k;
+						k={ex, ey};
+						return k;
+					}
+				}
+			}
+		}
+	}
+	LOC k;
+	k={0, 0};
+	return k;
+}
+
+LOC BoxBoard::getOpen3ChainLoc()//获得打开3链的坐标
+{
+   defineAllChains(false);
+    //先找到要打开的结构体的
+	int SuitChainidx=60;//编号
+	for (int i = 1; i < BOXNUM; i++)//有3链先打开3链
+	{
+		if (Chains[i].Type == LongChain&&Chains[i].ChainBoxNum==3)
+		{
+			SuitChainidx = i;
+		}
+	}
+	
+	//获得要打开的结构体中可占坐标
+	for (int y = 1; y <= BOXLEN; y++)
+	{
+		for (int x = 1; x <= BOXLEN; x++)
+		{
+			if (Boxes[x][y].BelongingChainNum == SuitChainidx)
+			{
+
+				int Dir[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+				int bx = x * 2 - 1;
+				int by = y * 2 - 1;
+
+				for (int n = 0; n < 4; n++)
+				{
+					int ex = bx + Dir[n][0];
+					int ey = by + Dir[n][1];
+					int nbx = x + Dir[n][0];
+					int nby = y + Dir[n][1];
+					if ((map[ex][ey]==HENG||map[ex][ey]==SHU)&&Boxes[nbx][nby].BelongingChainNum == SuitChainidx)//找到两个格子交叉的那条边
+					{
+						LOC k;
+						k={ex, ey};
+						return k;
+					}
+				}
+			}
+		}
+	}
+	LOC k;
+	k={0, 0};
+	return k;
+}
+
+bool BoxBoard::rationalState(LOC BoxNum)
+{
+	if (BoxNum.first >= BoxNum.second)
+		return true;
+	return false;
+}
+
+LOC BoxBoard::getEarlyRationalBoxNum()//用于UCT预处理，获得余下局面双方以理性状态可以获得的格子数量
+{
+	defineAllChains(false);
+
+	//首先清算各种链的数目
+	int LCNum = 0;//长链数目
+	int LCBox = 0;
+	int CNum = 0;//环数目
+	int CBox = 0;
+	int PCNum = 0;//预备环的数目
+	int PCBox = 0;
+
+	for (int i = 1; i <= 25; i++)
+	{
+		if (Chains[i].Type != NotDefine)
+		{
+			if (Chains[i].Type == LongChain)
+			{
+				LCNum++;
+				LCBox += Chains[i].ChainBoxNum;
+			}
+			else if (Chains[i].Type == Circle)
+			{
+				CNum++;
+				CBox += Chains[i].ChainBoxNum;
+			}
+		}
+	}
+
+	//开始计算理性状态下，对方牺牲的格子数(也就是对方让给我方的格子数)
+	int Total = LCBox + PCBox + CBox;
+	int Sacrifice = 0;
+	if (LCNum == 0&&CNum!=0)//此状况下不存在长链，则都是环
+	{
+		Sacrifice = (CNum - 1) * 4;//最后一个环对方肯定会吃掉，所以要-1
+	}
+	if(LCNum!=0)
+	{
+		//有长链的时候，最后一个必定是长链
+		Sacrifice = (CNum * 4) + (LCNum * 2) - 2;
+	}
+	LOC num;
+	num={Total - Sacrifice, Sacrifice};
+	return num;
+}
+
+LOC BoxBoard::getRationalStateBoxNum()
+{
+	defineAllChains(true);
+
+	//首先清算各种链的数目
+	int LCNum = 0;//长链
+	int LCBox = 0;
+	int CNum = 0;//环
+	int CBox = 0;
+	int PCNum = 0;//预备环
+	int PCBox = 0;
+	bool OnlyPreChain = true;//是否仅有预备链，也就是预备环的先决条件。是的话，最后一个必定是预备环
+
+	for (int i = 1; i <= BOXNUM; i++)
+	{
+		if (Chains[i].Type != NotDefine)
+		{
+			if (Chains[i].Type == LongChain)
+			{
+				if (Chains[i].ConditionOfPreCircle == false)
+					OnlyPreChain = false;
+				LCNum++;
+				LCBox += Chains[i].ChainBoxNum;
+			}
+			else if (Chains[i].Type == Circle)
+			{
+				CNum++;
+				CBox += Chains[i].ChainBoxNum;
+			}
+			else if (Chains[i].Type == PreCircle)
+			{
+				PCNum++;
+				PCBox += Chains[i].ChainBoxNum;
+			}
+		}
+	}
+
+	//开始计算牺牲数目
+	int Total = LCBox + PCBox + CBox;//总格子数
+	int Sacrifice = 0;
+	if (OnlyPreChain)
+	{
+		if (LCNum == 0)//但这个状况下不存在长链，则该情况都是环
+		{
+			Sacrifice = (CNum - 1) * 4;
+		}
+		else//存在长链，但都是预备链。最后一个必定为预备环
+		{
+			Sacrifice = (PCNum * 4) + (CNum * 4) + (LCNum * 2) - 4;
+		}
+	}
+	else
+	{
+		//有长链的时候，最后一个必定是长链
+		Sacrifice = (PCNum * 4) + (CNum * 4) + (LCNum * 2) - 2;
+	}
+	LOC num;
+	num={Total - Sacrifice, Sacrifice};
+	return num;
+}
+
+int BoxBoard::getBoardWinner(int LatterPlayer)
+{
+	if (getFilterMoveNum() > 0)
+		cout << "Wrong";
+	int player = LatterPlayer;
+	defineBoxesType();
+
+	LOC BoxNum;
+	for (;;)//非理性情况下吞并所有
+	{
+		defineAllChains(true);//先定义为完全状态判定一次
+		BoxNum = getRationalStateBoxNum();//然后再判定一次理性情况
+		if (rationalState(BoxNum))
+			break;
+		else
+		{
+			if (!captualShortestChain(player))//如果吃不下去了也退出
+				break;
+			else
+				player = -player;
+		}
+	}
+	if (getWinner() == 0)//也就是还没胜利
+	{
+		int r, b;
+		if (player == BLACK)
+		{
+			r = BoxNum.first + getPlayerBoxes(BLACK);//玩家是红方，则加上除去牺牲剩余的格子数
+			b = BoxNum.second + getPlayerBoxes(WHITE);
+		}
+		else
+		{
+			r = BoxNum.second + getPlayerBoxes(BLACK);
+			b = BoxNum.first + getPlayerBoxes(WHITE);//玩家是蓝方，则加上牺牲剩余的格子数
+		}
+		if (r > b)
+			return BLACK;
+		else
+			return WHITE;
+	}
+	else
+		return getWinner();
+}
+
+bool BoxBoard::getDeadChainExist()
+{
+	defineDeadChain();
+	for (int i = 0; i < BOXNUM; i++)
+	{
+		if (Chains[i].Type == DeadChain)
+			return true;
+	}
+	return false;
+}
+bool BoxBoard::getDeadCircleExist()
+{
+	defineDeadChain();
+	for (int i = 0; i < BOXNUM; i++)
+	{
+		if (Chains[i].Type == DeadCircle&&Chains[i].ChainBoxNum>3)//保证留两个双交
+			return true;
+	}
+	return false;
 }

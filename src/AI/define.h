@@ -10,6 +10,13 @@
 #include <vector>
 
 #pragma once
+
+//各种链的编号  未定义，长链，短链，环，预备环，死链，死环
+enum ChainType
+{
+	NotDefine, LongChain, ShortChain, Circle, PreCircle, DeadChain, DeadCircle
+};
+
 // 点
 #define DOT 10
 
@@ -37,6 +44,11 @@ constexpr double C = 1;    //UCB 常数
 #define BOXLEN 5	//格子数组长度
 #define BOXNUM 25
 
+//UCT
+#define UCT_MC_TIMES 1
+#define UCT_TIMES 15000000
+#define UCT_LIMIT_TIME 32
+#define UCT_FILTER_RANGE 30
 
 // 一些常用的
 // 不适用using namespace std,是为了防止和std空间里的命名冲突

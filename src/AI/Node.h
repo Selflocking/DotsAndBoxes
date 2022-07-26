@@ -1,28 +1,32 @@
 #include "board.h"
 #include "define.h"
+#include "UCT.h"
+#include "assess.h"
 #ifndef DOTS_AND_BOXES_NODE_H
 #define DOTS_AND_BOXES_NODE_H
 
 constexpr int INF = 1e9; /**< 无穷大 */
 
-class Node
+class Node:public Board
 {
   public:
-    Board board;                        /**< 棋面 */
-    Node *parent = nullptr;                       /**< 父节点 */
-    double income = 0;                  /**< 收益值 */
-    int total = 0;                      /**< 总共模拟次数*/
-    double UCBValue = INF;                /**< UCB值 */
-    int player;                         /**< 节点所属下棋方 */
-    vector<LOC> moves;                   /**< 可行的落子位置 */
-    LOC action;                         /**< 节点代表的动作 */
-    vector<Node* > children;              /**< 节点的子节点 */
-    Node(Board &board, int player);
-    Node(Board &board, int player, Node *parent, LOC action); /**< 构造函数 */
-    bool operator<(const Node &) const; /**< @brief 排序需要*/
-    bool operator>(const Node &) const; /**< @brief 排序需要*/
-    void computeUCB(int n);             /**< @brief 计算该节点UCB值*/
-    void expand();                     /**< @brief 展开节点*/
+    	//UCT使用的值
+	 int Owner;						//所属玩家
+	 int Times;						//被尝试过的次数
+	 int BoardWinner;				//这个局面的胜利者
+	 int ExistChild;					//子节点当前的数目
+	 int TotalChild;					//子节点的总数。
+	 float AvgValue;					//对父节点而言，这个节点的平均收益 
+	 LOC NodeMoves[60];			//这个子节点所有可能的招式
+	 Node* ChildNodes[60];	//指向第一个子节点的指针
+
+     Node();//构造函数
+	 Node(int Player, int Array[LEN][LEN],bool GetCBox, int Filter_Range);//*构造函数
+
+    //功能函数
+	 float refreshAvgValue();//*更新平均收益
+	 float getUCBValue(int Total);//*根据现在的平均收益而获得UCB值
+	 Node* expandUCTNode(int MC_Times, int Filter_Range);//*扩展节点
 };
 
 #endif // DOTS_AND_BOXES_NODE_H
