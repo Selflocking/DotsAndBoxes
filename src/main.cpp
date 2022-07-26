@@ -1,28 +1,110 @@
-#include "./AI/UCT.h"
-#include "./AI/board.h"
-#include "./AI/define.h"
+#include "AI/board.h"
+#include "AI/define.h"
 #include <SFML/Graphics.hpp>
-#include <SFML/Graphics/CircleShape.hpp>
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/Rect.hpp>
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Graphics/Sprite.hpp>
-#include <SFML/Graphics/Text.hpp>
-#include <SFML/Graphics/Texture.hpp>
-#include <SFML/System/Vector2.hpp>
-#include <SFML/Window/Event.hpp>
-#include <SFML/Window/Mouse.hpp>
-#include <SFML/Window/Window.hpp>
-#include <iostream>
-Board *gameBoard;
+#include <future>
+struct Step
+{
+    int player;
+    LOC action;
+};
+sf::RenderWindow mainWindow;
 sf::Font font;
-sf::Clock gameClock;
+sf::Texture texture;
+sf::Sprite sprite;
+
+Board *gameBoard;
+
 int nowPlayer = BLACK;
-bool GameBegin = false;
-bool HumanFirst = true;
-sf::Time X_Time = sf::seconds(0.f);
-sf::Time H_Time = sf::seconds(0.f);
-void DrawCircle(sf::RenderWindow &Window)
+
+bool black_ai = false;
+bool white_ai = false;
+bool game_begin = false;
+
+vector<Step> steps;
+////////显示左侧棋盘函数//////////
+void showGameBoard();
+void showVisualLine();
+void showLine();
+void showBox();
+void showDots();
+///////显示右侧信息和按钮///////
+sf::RectangleShape first_button(sf::Vector2f(100, 80));
+sf::RectangleShape second_button(sf::Vector2f(100, 80));
+//////游戏开始////////
+sf::RectangleShape GameButton(sf::Vector2f(300.f, 100.f));
+///////undo和redo/////
+sf::RectangleShape undo_button(sf::Vector2f(150.f, 100.f));
+sf::RectangleShape redo_button(sf::Vector2f(150.f, 100.f));
+///////打印棋盘////////
+sf::RectangleShape print_button(sf::Vector2f(300, 100));
+///////加载棋盘////////
+sf::RectangleShape load_button(sf::Vector2f(300, 100));
+void initSidebar();
+void showSidebar();
+void showInformation();
+void showGameBegin();
+void showUndoAndRedo();
+void showPrintBoard();
+void showSetPlayer();
+void showLoadBoard();
+////////按键处理//////////
+void handleButtons(int x, int y);
+void handleBoard(int x, int y);
+////////检查是否在内部/////////
+bool contains(sf::RectangleShape &box, int x, int y);
+////////AI移动///////////
+std::future<void> work;
+int status = 0;
+void AIMove();
+int main()
+{
+    mainWindow.create(sf::VideoMode(1500, 1000), L"Heap Overflow 点格棋", sf::Style::Default);
+    mainWindow.setVerticalSyncEnabled(true);
+    gameBoard = new Board;
+    font.loadFromFile("res/LXGWWenKai-Bold.ttf");
+    texture.loadFromFile("res/board.jpg", sf::IntRect(0, 0, 1000, 1000));
+    sprite.setTexture(texture);
+
+    initSidebar();
+    while (mainWindow.isOpen())
+    {
+        AIMove();
+        sf::Event event;
+        while (mainWindow.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+            {
+                mainWindow.close();
+            }
+            else if (event.type == sf::Event::MouseButtonPressed&&!status)
+            {
+                if (event.mouseButton.x < 1000)
+                {
+                    handleBoard(event.mouseButton.x, event.mouseButton.y);
+                }
+                else
+                {
+                    handleButtons(event.mouseButton.x, event.mouseButton.y);
+                }
+            }
+        }
+        mainWindow.clear(sf::Color(66, 66, 66));
+        showGameBoard();
+        showSidebar();
+        mainWindow.display();
+    }
+}
+
+////////显示左侧棋盘函数//////////
+void showGameBoard()
+{
+    mainWindow.draw(sprite);
+    showDots();
+    showVisualLine();
+    showLine();
+    showBox();
+}
+void showDots()
 {
     for (int i = 0; i < 6; ++i)
     {
@@ -31,14 +113,14 @@ void DrawCircle(sf::RenderWindow &Window)
             sf::CircleShape c(15);
             c.setFillColor(sf::Color::Black);
             c.setPosition(110 + i * 150, 110 + j * 150);
-            Window.draw(c);
+            mainWindow.draw(c);
         }
     }
 }
-void ShowVisualLine(sf::RenderWindow &Window)
+void showVisualLine()
 {
     sf::RectangleShape line(sf::Vector2f(120.f, 10.f));
-    sf::Vector2i pos = sf::Mouse::getPosition(Window);
+    sf::Vector2i pos = sf::Mouse::getPosition(mainWindow);
     int x = pos.x;
     int y = pos.y;
     line.setFillColor(sf::Color(97, 97, 97));
@@ -47,17 +129,17 @@ void ShowVisualLine(sf::RenderWindow &Window)
         if ((y - 110) % 150 < 30 && (x - 140) % 150 < 120)
         {
             line.setPosition((x - 110) / 150 * 150 + 140, (y - 110) / 150 * 150 + 120);
-            Window.draw(line);
+            mainWindow.draw(line);
         }
         else if ((x - 110) % 150 < 30 && (y - 140) % 150 < 120)
         {
             line.rotate(90.f);
             line.setPosition((x - 110) / 150 * 150 + 130, (y - 110) / 150 * 150 + 140);
-            Window.draw(line);
+            mainWindow.draw(line);
         }
     }
 }
-void ShowLine(sf::RenderWindow &Window)
+void showLine()
 {
     for (int i = 0; i < 11; i += 2)
     {
@@ -68,7 +150,7 @@ void ShowLine(sf::RenderWindow &Window)
                 sf::RectangleShape line(sf::Vector2f(120.f, 10.f));
                 line.setFillColor(sf::Color::Black);
                 line.setPosition(j / 2 * 150 + 140, i / 2 * 150 + 120);
-                Window.draw(line);
+                mainWindow.draw(line);
             }
         }
     }
@@ -82,12 +164,12 @@ void ShowLine(sf::RenderWindow &Window)
                 line.setFillColor(sf::Color::Black);
                 // 棋盘的x对应y，棋盘的y对应x
                 line.setPosition(j / 2 * 150 + 120, i / 2 * 150 + 140);
-                Window.draw(line);
+                mainWindow.draw(line);
             }
         }
     }
 }
-void ShowBox(sf::RenderWindow &Window)
+void showBox()
 {
     for (int i = 1; i < 11; i += 2)
     {
@@ -105,33 +187,99 @@ void ShowBox(sf::RenderWindow &Window)
                     box.setFillColor(sf::Color(33, 150, 243));
                 }
                 box.setPosition(j / 2 * 150 + 140, i / 2 * 150 + 140);
-                Window.draw(box);
+                mainWindow.draw(box);
             }
         }
     }
 }
-void SideBar(sf::RenderWindow &Window)
+/////////显示右侧信息和按钮/////////
+void initSidebar()
 {
-    ///////先后手////////
+    //////玩家切换////////
+    first_button.setPosition(1100, 250);
+    second_button.setPosition(1300, 250);
+    //////游戏开始////////
+    GameButton.setPosition(1100, 350);
+    //////undo和redo//////
+    undo_button.setFillColor(sf::Color(41, 121, 255));
+    redo_button.setFillColor(sf::Color(29, 233, 182));
+    undo_button.setPosition(1050, 500);
+    redo_button.setPosition(1300, 500);
+    //////打印棋盘////////
+    print_button.setFillColor(sf::Color(121, 85, 72));
+    print_button.setPosition(1100, 650);
+    ///////加载棋盘////////
+    load_button.setFillColor(sf::Color(69, 90, 100));
+    load_button.setPosition(1100, 800);
+}
+void showSidebar()
+{
+    showInformation();
+    showSetPlayer();
+    showGameBegin();
+    showUndoAndRedo();
+    showPrintBoard();
+    showLoadBoard();
+}
+void showInformation()
+{
+    ////////先后手/////////////
     sf::Text x_title(L"先手", font, 50);
     sf::Text h_title(L"后手", font, 50);
     x_title.setPosition(1100, 25);
     h_title.setPosition(1300, 25);
-    Window.draw(x_title);
-    Window.draw(h_title);
-    ////////得分////////
+    mainWindow.draw(x_title);
+    mainWindow.draw(h_title);
+    ////////////得分//////////////
     sf::Text x_score(std::to_string(gameBoard->blackBox), font, 40);
     sf::Text h_score(std::to_string(gameBoard->whiteBox), font, 40);
     x_score.setPosition(1130, 80);
     h_score.setPosition(1330, 80);
-    Window.draw(x_score);
-    Window.draw(h_score);
-    /////////开始游戏////////
+    mainWindow.draw(x_score);
+    mainWindow.draw(h_score);
+}
+void showSetPlayer()
+{
+    sf::Text first_human_text(L"玩家", font, 40);
+    sf::Text first_ai_text(L"机器", font, 40);
+    sf::Text second_human_text(L"玩家", font, 40);
+    sf::Text second_ai_text(L"机器", font, 40);
+    first_human_text.setPosition(1110, 260);
+    first_ai_text.setPosition(1110, 260);
+    second_human_text.setPosition(1310, 260);
+    second_ai_text.setPosition(1310, 260);
+
+    if (black_ai)
+    {
+        first_button.setFillColor(sf::Color(1, 87, 155));
+        mainWindow.draw(first_button);
+        mainWindow.draw(first_ai_text);
+    }
+    else
+    {
+        first_button.setFillColor(sf::Color(255, 196, 0));
+        mainWindow.draw(first_button);
+        mainWindow.draw(first_human_text);
+    }
+    if (white_ai)
+    {
+        second_button.setFillColor(sf::Color(1, 87, 155));
+        mainWindow.draw(second_button);
+        mainWindow.draw(second_ai_text);
+    }
+    else
+    {
+        second_button.setFillColor(sf::Color(255, 196, 0));
+        mainWindow.draw(second_button);
+        mainWindow.draw(second_human_text);
+    }
+}
+void showGameBegin()
+{
     sf::Text BeginText("", font, 50);
-    sf::RectangleShape GameButton(sf::Vector2f(300.f, 100.f));
-    GameButton.setPosition(1100, 350);
+
     BeginText.setPosition(1150, 370);
-    if (!GameBegin)
+    if (!game_begin)
     {
         BeginText.setString(L"开始游戏");
         GameButton.setFillColor(sf::Color(76, 175, 80));
@@ -141,207 +289,122 @@ void SideBar(sf::RenderWindow &Window)
         BeginText.setString(L"结束游戏");
         GameButton.setFillColor(sf::Color(183, 28, 28));
     }
-    Window.draw(GameButton);
-    Window.draw(BeginText);
-    ////////时间//////////
-    sf::Text xtt("", font, 30);
-    sf::Text htt("", font, 30);
-    int xt = 0, ht = 0;
-    if (GameBegin)
+    mainWindow.draw(GameButton);
+    mainWindow.draw(BeginText);
+}
+void showUndoAndRedo()
+{
+    sf::Text undo_text("undo", font, 50);
+    sf::Text redo_text("redo", font, 50);
+    undo_text.setPosition(1070, 510);
+    redo_text.setPosition(1325, 510);
+    mainWindow.draw(undo_button);
+    mainWindow.draw(redo_button);
+    mainWindow.draw(undo_text);
+    mainWindow.draw(redo_text);
+}
+void showPrintBoard()
+{
+    sf::Text print_text(L"打印棋盘", font, 50);
+    print_text.setPosition(1150, 675);
+    mainWindow.draw(print_button);
+    mainWindow.draw(print_text);
+}
+void showLoadBoard()
+{
+    sf::Text load_text(L"加载棋局", font, 50);
+    load_text.setPosition(1150, 825);
+    mainWindow.draw(load_button);
+    mainWindow.draw(load_text);
+}
+////////处理按钮//////////
+void handleButtons(int x, int y)
+{
+    if (contains(first_button, x, y))
     {
-        if (nowPlayer == BLACK)
+        black_ai = !black_ai;
+    }
+    else if (contains(second_button, x, y))
+    {
+        white_ai = !white_ai;
+    }
+    else if (contains(GameButton, x, y))
+    {
+        if (game_begin)
         {
-            xt = X_Time.asSeconds() + gameClock.getElapsedTime().asSeconds();
-            ht = H_Time.asSeconds();
+            delete gameBoard;
+            gameBoard = new Board;
+            game_begin = false;
         }
         else
         {
-            xt = X_Time.asSeconds();
-            ht = H_Time.asSeconds() + gameClock.getElapsedTime().asSeconds();
+            game_begin = true;
         }
     }
-    if (xt > 60)
+    else if (contains(redo_button, x, y))
     {
-        xtt.setPosition(1100, 150);
-        string t;
-        t += std::to_string(xt / 60);
-        t += "m";
-        t += std::to_string(xt % 60);
-        t += "s";
-        xtt.setString(t);
     }
-    else
+    else if (contains(undo_button, x, y))
     {
-        xtt.setPosition(1135, 150);
-        xtt.setString(std::to_string(xt) + "s");
     }
-    if (ht > 60)
+    else if (contains(print_button, x, y))
     {
-        htt.setPosition(1300, 150);
-        string t;
-        t += std::to_string(ht / 60);
-        t += "m";
-        t += std::to_string(ht % 60);
-        t += "s";
-        htt.setString(t);
     }
-    else
+    else if (contains(load_button, x, y))
     {
-        htt.setPosition(1335, 150);
-        htt.setString(std::to_string(ht) + "s");
     }
-    Window.draw(xtt);
-    Window.draw(htt);
-    ////////先后手交换/////////
-    sf::Text WhoFirst("", font, 30);
-    sf::RectangleShape FirstButton(sf::Vector2f(150.f, 80.f));
-    FirstButton.setPosition(1175, 250);
-    if (HumanFirst)
-    {
-        WhoFirst.setPosition(1190, 270);
-        FirstButton.setFillColor(sf::Color(255, 152, 0));
-        WhoFirst.setString(L"玩家优先");
-    }
-    else
-    {
-        WhoFirst.setPosition(1205, 270);
-        FirstButton.setFillColor(sf::Color(0, 188, 212));
-        WhoFirst.setString(L"AI优先");
-    }
-    Window.draw(FirstButton);
-    Window.draw(WhoFirst);
 }
-int main()
+void handleBoard(int x, int y)
 {
-    gameBoard = new Board;
-    sf::RenderWindow mainWindow;
-    sf::Texture wooden;
-    wooden.loadFromFile("res/board.jpg", sf::IntRect(0, 0, 1000, 1000));
-    sf::Sprite board(wooden);
-
-    font.loadFromFile("res/LXGWWenKai-Bold.ttf");
-
-    mainWindow.create(sf::VideoMode(1500, 1000), L"Heap Overflow 点格棋");
-    mainWindow.setVerticalSyncEnabled(true); // 垂直同步
-    while (mainWindow.isOpen())
+    if (x > 890 || x < 110 || y > 890 || y < 110)
+        return;
+    if ((y - 110) % 150 < 30 && (x - 140) % 150 < 120)
     {
-        sf::Event event;
-        while (mainWindow.pollEvent(event))
+        // x坐标对应棋盘的y，y坐标对应棋盘的x
+        int bx = (y - 110) / 150 * 2;
+        int by = (x - 140) / 150 * 2 + 1;
+        if (gameBoard->map[bx][by] == OCCLINE)
         {
-            switch (event.type)
-            {
-            case sf::Event::Closed:
-                mainWindow.close();
-                break;
-            case sf::Event::MouseButtonPressed:
-                int x = event.mouseButton.x;
-                int y = event.mouseButton.y;
-                ////////占边////////////
-                if (x < 890 && x > 110 && y < 890 && y > 110)
-                {
-                    if ((y - 110) % 150 < 30 && (x - 140) % 150 < 120)
-                    {
-                        // x坐标对应棋盘的y，y坐标对应棋盘的x
-                        int bx = (y - 110) / 150 * 2;
-                        int by = (x - 140) / 150 * 2 + 1;
-                        if (gameBoard->map[bx][by] == OCCLINE)
-                        {
-                            break;
-                        }
-                        if (gameBoard->move(nowPlayer, {bx, by}) == 0)
-                        {
-                            nowPlayer = -nowPlayer;
-                        }
-                    }
-                    else if ((x - 110) % 150 < 30 && (y - 140) % 150 < 120)
-                    {
-                        // x坐标对应棋盘的y，y坐标对应棋盘的x
-                        int bx = (y - 140) / 150 * 2 + 1;
-                        int by = (x - 110) / 150 * 2;
-                        if (gameBoard->map[bx][by] == OCCLINE)
-                        {
-                            break;
-                        }
-                        if (gameBoard->move(nowPlayer, {bx, by}) == 0)
-                        {
-                            nowPlayer = -nowPlayer;
-                        }
-                    }
-                }
-                ////////开始游戏/////////
-                else if (x < 1400 && x > 1100 && y > 350 && y < 450)
-                {
-                    if (GameBegin)
-                    {
-                        GameBegin = false;
-                        delete gameBoard;
-                        gameBoard = new Board;
-                        nowPlayer = BLACK;
-                    }
-                    else
-                    {
-                        X_Time = H_Time = sf::seconds(0.f);
-                        if (nowPlayer == BLACK)
-                        {
-                            if (!HumanFirst)
-                            {
-                                UCT(gameBoard, nowPlayer);
-                            }
-                        }
-                        else
-                        {
-                            if (HumanFirst)
-                            {
-                                UCT(gameBoard, nowPlayer);
-                            }
-                        }
-                        gameClock.restart();
-                        GameBegin = true;
-                    }
-                }
-                /////////谁优先//////////
-                else if (x > 1175 && x < 1325 && y > 250 && y < 330)
-                {
-                    HumanFirst ^= 1;
-                }
-                break;
-            }
+            return;
         }
-        if (GameBegin)
+        if (gameBoard->move(nowPlayer, {bx, by}) == 0)
         {
-            if (nowPlayer == BLACK)
-            {
-                if (!HumanFirst)
-                {
-                    H_Time += gameClock.getElapsedTime();
-                    gameClock.restart();
-                    UCT(gameBoard, nowPlayer);
-                    nowPlayer = -nowPlayer;
-                    X_Time += gameClock.getElapsedTime();
-                    gameClock.restart();
-                }
-            }
-            else
-            {
-                if (HumanFirst)
-                {
-                    X_Time += gameClock.getElapsedTime();
-                    gameClock.restart();
-                    UCT(gameBoard, nowPlayer);
-                    nowPlayer = -nowPlayer;
-                    H_Time += gameClock.getElapsedTime();
-                    gameClock.restart();
-                }
-            }
+            nowPlayer = -nowPlayer;
         }
-        mainWindow.clear(sf::Color(66, 66, 66));
-        mainWindow.draw(board);
-        DrawCircle(mainWindow);
-        ShowVisualLine(mainWindow);
-        ShowLine(mainWindow);
-        ShowBox(mainWindow);
-        SideBar(mainWindow);
-        mainWindow.display();
     }
-    return 0;
+    if ((x - 110) % 150 < 30 && (y - 140) % 150 < 120)
+    {
+        // x坐标对应棋盘的y，y坐标对应棋盘的x
+        int bx = (y - 140) / 150 * 2 + 1;
+        int by = (x - 110) / 150 * 2;
+        if (gameBoard->map[bx][by] == OCCLINE)
+        {
+            return;
+        }
+        if (gameBoard->move(nowPlayer, {bx, by}) == 0)
+        {
+            nowPlayer = -nowPlayer;
+        }
+    }
+}
+////////检查是否在内部/////////
+bool contains(sf::RectangleShape &box, int x, int y)
+{
+    x -= box.getPosition().x;
+    y -= box.getPosition().y;
+    return box.getLocalBounds().contains(x, y);
+}
+
+void AIMove(){
+    if(!status)
+        return ;
+    if(nowPlayer==BLACK){
+        if(black_ai){
+//            work = std::async()
+        }
+    }else{
+        if(white_ai){
+//            work = std::async()
+        }
+    }
 }
