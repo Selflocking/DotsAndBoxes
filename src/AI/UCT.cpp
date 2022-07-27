@@ -4,6 +4,7 @@
 #include <random>
 #include <thread>
 #include "assess.h"
+#include "UCT.h"
 
 int getBoardWinner(Board &CB, int LatterPlayer)
 {
@@ -377,7 +378,7 @@ void latterSituationMove(Board &CB, int Player, bool Msg)
 }
 
 //游戏移动，会根据前中后期自动移动
-void  gameTurnMove(Board &CB, int Player, bool Msg)
+void  gameTurnMove(Board &CB, int Player, bool Msg,int* status)
 {
 	//This Function is using for the game's move turn.
 
@@ -391,6 +392,7 @@ void  gameTurnMove(Board &CB, int Player, bool Msg)
 		//也就是Filter都已经无能为力的情况下，只有LongChain,Circle,PreCircle
 		latterSituationMove(CB, Player, Msg);
 	}
+    *status = 1;
 }
 
 int  rndFilterTurn(Board &CB, int Player, bool Msg, int Filter_Range)

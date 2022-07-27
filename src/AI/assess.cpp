@@ -1058,3 +1058,27 @@ bool BoxBoard::getDeadCircleExist()
 	}
 	return false;
 }
+
+void BoxBoard::defineBoxesType()//定义格子类型
+{
+    for (int y = 1; y <= BOXLEN; y++)//格子数
+    {
+        for (int x = 1; x <= BOXLEN; x++)//格子数
+        {
+            int bx = (x * 2) - 1;//Board中的坐标#表格子属主坐标#
+            int by = (y * 2) - 1;//Board中的坐标
+            Boxes[x][y].BoxLoc = {bx, by};//存入坐标
+            //定义Owner
+            if (map[bx][by] == BOX)//如果还没被占领
+                Boxes[x][y].BoxOwner = 0;//未被占领
+            else
+                Boxes[x][y].BoxOwner = map[bx][by] / 2;//除以二之后的数值等同于玩家编号
+            //定义Type
+            int bl = getFreedom(bx, by);//得到格子的自由度
+            if (bl == 4)
+                Boxes[x][y].Type = FREEBOX;	//是自由格
+            else
+                Boxes[x][y].Type = bl;	//不然就跟自由边的数量是相同的。
+        }
+    }
+}

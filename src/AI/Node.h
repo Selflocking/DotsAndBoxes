@@ -1,7 +1,5 @@
 #include "board.h"
 #include "define.h"
-#include "UCT.h"
-#include "assess.h"
 #ifndef DOTS_AND_BOXES_NODE_H
 #define DOTS_AND_BOXES_NODE_H
 

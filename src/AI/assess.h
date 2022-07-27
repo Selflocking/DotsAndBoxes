@@ -1,6 +1,5 @@
 #include "define.h"
 #include "board.h"
-#include <windows.h>
 
 #pragma once
 

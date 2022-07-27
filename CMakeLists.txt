@@ -5,7 +5,7 @@ project(dots_and_boxes)
 set(CMAKE_CXX_STANDARD 17)
 IF(WIN32)
 # 定义第三方库路径
-#set(SFML_DIR 3rdparty/SFML/lib/cmake/SFML)
+set(SFML_DIR 3rdparty/SFML/lib/cmake/SFML)
 ENDIF()
 # 查找第三方库
 find_package(SFML 2.5 COMPONENTS

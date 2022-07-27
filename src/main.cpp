@@ -1,3 +1,4 @@
+#include "AI/UCT.h"
 #include "AI/board.h"
 #include "AI/define.h"
 #include <SFML/Graphics.hpp>
@@ -68,7 +69,6 @@ int main()
     initSidebar();
     while (mainWindow.isOpen())
     {
-        AIMove();
         sf::Event event;
         while (mainWindow.pollEvent(event))
         {
@@ -76,7 +76,7 @@ int main()
             {
                 mainWindow.close();
             }
-            else if (event.type == sf::Event::MouseButtonPressed&&!status)
+            else if (event.type == sf::Event::MouseButtonPressed && !work.valid())
             {
                 if (event.mouseButton.x < 1000)
                 {
@@ -88,6 +88,7 @@ int main()
                 }
             }
         }
+        AIMove();
         mainWindow.clear(sf::Color(66, 66, 66));
         showGameBoard();
         showSidebar();
@@ -395,16 +396,32 @@ bool contains(sf::RectangleShape &box, int x, int y)
     return box.getLocalBounds().contains(x, y);
 }
 
-void AIMove(){
-    if(!status)
-        return ;
-    if(nowPlayer==BLACK){
-        if(black_ai){
-//            work = std::async()
+void AIMove()
+{
+    if (!work.valid())
+    {
+        if (nowPlayer == BLACK)
+        {
+            if (black_ai)
+            {
+                work = std::async(std::launch::async, gameTurnMove, std::ref(*gameBoard), std::ref(nowPlayer), false,
+                                  &status);
+            }
         }
-    }else{
-        if(white_ai){
-//            work = std::async()
+        else
+        {
+            if (white_ai)
+            {
+                work = std::async(std::launch::async, gameTurnMove, std::ref(*gameBoard), std::ref(nowPlayer), false,
+                                  &status);
+            }
         }
+    }
+    if (status)
+    {
+        work.wait();
+        work.get();
+        nowPlayer = -nowPlayer;
+        status = 0;
     }
 }

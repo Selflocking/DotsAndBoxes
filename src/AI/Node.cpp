@@ -1,4 +1,6 @@
 #include "Node.h"
+#include "UCT.h"
+#include "assess.h"
 #include <cmath>
 
 
