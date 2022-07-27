@@ -88,7 +88,7 @@ int main()
                 }
             }
         }
-        AIMove();
+        if(game_begin) AIMove();
         mainWindow.clear(sf::Color(66, 66, 66));
         showGameBoard();
         showSidebar();
