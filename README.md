@@ -60,6 +60,7 @@ g++ src/*.cpp src/AI/*.cpp -o build/game.exe -I ./3rdparty/SFML/include -L./3rdp
 3. 重启VS Code
 4. 重新打开会让你选择工具,选择`GCC 11.2.0 X86_64-w64-mingw32-make`
 5. 如果上一步不小心选错，按`Ctrl`+`Shift`+`P`打开指令栏，输入kit,点击`CMake: 选择工具包`重新选择
+6. 成功后点击VS Code下方状态栏上的运行按钮即可运行，如需调试请安装官方插件[C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)
 #### Clion
 1. 打开Clion，选择从VCS导入，输入https://gitee.com/YunShu007/dots-and-boxes.git
 2. 等待加载，完成后会弹出配置cmake的窗口，直接点确定即可。
