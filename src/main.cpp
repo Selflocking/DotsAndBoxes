@@ -1,6 +1,7 @@
 #include "AI/UCT.h"
 #include "AI/board.h"
 #include "AI/define.h"
+#include "element/Time.h"
 #include <SFML/Graphics.hpp>
 #include <future>
 struct Step
@@ -16,12 +17,16 @@ sf::Sprite sprite;
 Board *gameBoard;
 
 int nowPlayer = BLACK;
+Time black_time;
+Time white_time;
 
 bool black_ai = false;
 bool white_ai = false;
 bool game_begin = false;
 
 vector<Step> steps;
+int top = -1;
+
 ////////显示左侧棋盘函数//////////
 void showGameBoard();
 void showVisualLine();
@@ -29,6 +34,7 @@ void showLine();
 void showBox();
 void showDots();
 ///////显示右侧信息和按钮///////
+sf::CircleShape now_player(10);
 sf::RectangleShape first_button(sf::Vector2f(100, 80));
 sf::RectangleShape second_button(sf::Vector2f(100, 80));
 //////游戏开始////////
@@ -42,6 +48,7 @@ sf::RectangleShape print_button(sf::Vector2f(300, 100));
 sf::RectangleShape load_button(sf::Vector2f(300, 100));
 void initSidebar();
 void showSidebar();
+void showNowPlayer();
 void showInformation();
 void showGameBegin();
 void showUndoAndRedo();
@@ -88,7 +95,8 @@ int main()
                 }
             }
         }
-        if(game_begin) AIMove();
+        if (game_begin)
+            AIMove();
         mainWindow.clear(sf::Color(66, 66, 66));
         showGameBoard();
         showSidebar();
@@ -196,6 +204,10 @@ void showBox()
 /////////显示右侧信息和按钮/////////
 void initSidebar()
 {
+    ///////显示当前玩家////////
+    now_player.setFillColor(sf::Color(158,158,158));
+    now_player.setOutlineColor(sf::Color(183, 28, 28));
+    now_player.setOutlineThickness(10);
     //////玩家切换////////
     first_button.setPosition(1100, 250);
     second_button.setPosition(1300, 250);
@@ -216,11 +228,20 @@ void initSidebar()
 void showSidebar()
 {
     showInformation();
+    showNowPlayer();
     showSetPlayer();
     showGameBegin();
     showUndoAndRedo();
     showPrintBoard();
     showLoadBoard();
+}
+void showNowPlayer(){
+    if(nowPlayer==BLACK){
+        now_player.setPosition(1050,50);
+    }else{
+        now_player.setPosition(1250,50);
+    }
+    mainWindow.draw(now_player);
 }
 void showInformation()
 {
@@ -238,6 +259,33 @@ void showInformation()
     h_score.setPosition(1330, 80);
     mainWindow.draw(x_score);
     mainWindow.draw(h_score);
+    ////////显示时间/////////
+    string tem;
+    time_t b_time = black_time.get();
+    if (b_time > 60)
+    {
+        tem = std::to_string(b_time / 60) + "m " + std::to_string(b_time % 60) + "s";
+    }
+    else
+    {
+        tem = "" + std::to_string(b_time) + "s";
+    }
+    sf::Text x_time(tem, font, 30);
+    tem.clear();
+    time_t w_time = white_time.get();
+    if (w_time > 60)
+    {
+        tem = std::to_string(w_time / 60) + "m " + std::to_string(w_time % 60) + "s";
+    }
+    else
+    {
+        tem = std::to_string(w_time) + "s";
+    }
+    sf::Text h_time(tem, font, 30);
+    x_time.setPosition(1130, 150);
+    h_time.setPosition(1330, 150);
+    mainWindow.draw(x_time);
+    mainWindow.draw(h_time);
 }
 void showSetPlayer()
 {
@@ -336,10 +384,25 @@ void handleButtons(int x, int y)
             delete gameBoard;
             gameBoard = new Board;
             game_begin = false;
+            nowPlayer = BLACK;
+            black_time.reset();
+            white_time.reset();
         }
         else
         {
             game_begin = true;
+            if (nowPlayer == BLACK)
+            {
+                black_time.begin();
+                white_time.begin();
+                white_time.stop();
+            }
+            else
+            {
+                white_time.begin();
+                black_time.begin();
+                black_time.stop();
+            }
         }
     }
     else if (contains(redo_button, x, y))
@@ -370,6 +433,19 @@ void handleBoard(int x, int y)
         }
         if (gameBoard->move(nowPlayer, {bx, by}) == 0)
         {
+            if (game_begin)
+            {
+                if (nowPlayer == BLACK)
+                {
+                    black_time.stop();
+                    white_time.start();
+                }
+                else
+                {
+                    white_time.stop();
+                    black_time.start();
+                }
+            }
             nowPlayer = -nowPlayer;
         }
     }
@@ -384,6 +460,19 @@ void handleBoard(int x, int y)
         }
         if (gameBoard->move(nowPlayer, {bx, by}) == 0)
         {
+            if (game_begin)
+            {
+                if (nowPlayer == BLACK)
+                {
+                    black_time.stop();
+                    white_time.start();
+                }
+                else
+                {
+                    white_time.stop();
+                    black_time.start();
+                }
+            }
             nowPlayer = -nowPlayer;
         }
     }
@@ -395,7 +484,7 @@ bool contains(sf::RectangleShape &box, int x, int y)
     y -= box.getPosition().y;
     return box.getLocalBounds().contains(x, y);
 }
-
+////////AI下棋函数//////////
 void AIMove()
 {
     if (!work.valid())
@@ -421,6 +510,16 @@ void AIMove()
     {
         work.wait();
         work.get();
+        if (nowPlayer == BLACK)
+        {
+            black_time.stop();
+            white_time.start();
+        }
+        else
+        {
+            white_time.stop();
+            black_time.start();
+        }
         nowPlayer = -nowPlayer;
         status = 0;
     }

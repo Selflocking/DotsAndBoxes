@@ -422,8 +422,8 @@ bool Board::ifEnd() const
 {
     if (blackBox + whiteBox == 25)
     {
-        if (blackBox > 12 || whiteBox > 12)
-            return true;
+        //        if (blackBox > 12 || whiteBox > 12)
+        return true;
     }
     else
         return false;
@@ -795,7 +795,7 @@ void Board::unmove(LOC l)
     }
     else
     {
-        // cout << "error: Board::unmove()" << endl;
+        cout << "error: Board::unmove()" << endl;
     }
 }
 bool Board::ifHaveSafeEdge()
