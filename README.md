@@ -2,6 +2,7 @@
 
 ## 使用方法
 首先确保你的MinGW使用MSVCRT，gcc版本最好为11.2。如果不确定，请使用这个[MinGW-w64](https://ysod.azurewebsites.net/%E5%BC%80%E5%8F%91/MinGW/winlibs-x86_64-posix-seh-gcc-11.2.0-mingw-w64msvcrt-10.0.0-r1.zip)或从群文件下载
+
 使用方法: 
 1. 将MinGW解压到某个地方，进入`/bin`目录，复制路径。
 2. 打开设置，进入系统-系统信息-高级系统设置，选择环境变量，在打开的窗口中双击用户变量里的`Path`,点击新建，把复制的路径粘贴进去，并把它上移到顶部。
@@ -12,6 +13,7 @@
 2. 进入项目目录，新建`build`文件夹，将`3rdparty/SFML/bin`文件夹中的`dll`文件复制到刚刚新建的`build`文件夹中, 将`res`目录复制进`build`目录中
 3. 使用VS Code打开项目，请保证VSCode仅打开项目文件夹，而不是打开项目文件夹的父文件夹
 4. 新建`.vscode`文件夹,在`.vscode`里新建文件`tasks.json`和`launch.json`.
+
 tasks.json:
 ```json
 {
@@ -61,6 +63,67 @@ g++ src/*.cpp src/AI/*.cpp -o build/game.exe -I ./3rdparty/SFML/include -L./3rdp
 4. 重新打开会让你选择工具,选择`GCC 11.2.0 X86_64-w64-mingw32-make`
 5. 如果上一步不小心选错，按`Ctrl`+`Shift`+`P`打开指令栏，输入kit,点击`CMake: 选择工具包`重新选择
 6. 成功后点击VS Code下方状态栏上的运行按钮即可运行，如需调试请安装官方插件[C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)
+
+tasks.json:
+```json
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cmake",
+			"label": "CMake: build",
+			"command": "build",
+			"targets": [
+				"dots_and_boxes"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": [],
+			"detail": "CMake template build task"
+		}
+	]
+}
+```
+
+launch.json:
+```json
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) 启动",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/dots_and_boxes.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build/",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description":  "将反汇编风格设置为 Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "CMake: build"
+        },
+    ]
+}
+```
+
 #### Clion
 1. 打开Clion，选择从VCS导入，输入https://gitee.com/YunShu007/dots-and-boxes.git
 2. 等待加载，完成后会弹出配置cmake的窗口，直接点确定即可。

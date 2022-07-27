@@ -222,13 +222,11 @@ void UCTMoveWithSacrifice(Board &CB,int Player,bool Msg)
 	bool DeadCircle = Dead.getDeadCircleExist();
 	if (DeadCircle||DeadChain)//有环的情况优先处理
 	{
-        BoxBoard Dead(CB);
 		int SacrificeBoxNum;
 		if (DeadChain)
 			SacrificeBoxNum = 2;
 		if (DeadCircle)
 			SacrificeBoxNum = 4;
-
 
 		//假设全部都吃掉了
 		Dead.eatAllCTypeBoxes(Player);

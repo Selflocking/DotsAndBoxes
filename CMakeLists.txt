@@ -9,6 +9,9 @@ IF(WIN32)
 set(SFML_DIR 3rdparty/SFML/lib/cmake/SFML)
 ENDIF()
 
+# 如需静态链接SFML请取消下句注释
+#set(SFML_STATIC_LIBRARIES TRUE)
+
 # 查找第三方库
 find_package(SFML 2.5 COMPONENTS
         system window graphics REQUIRED)
@@ -40,8 +43,8 @@ target_include_directories(dots_and_boxes PUBLIC 3rdparty/SFML/include)
 ENDIF()
 
 #如需静态链接
-#set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc")
-# 链接库 如需静态链接在PRIVATE后加上-static
+#set(CMAKE_EXE_LINKER_FLAGS "-static")
+# 链接库
 target_link_libraries(dots_and_boxes PRIVATE sfml-system sfml-window sfml-graphics)
 
 IF (WIN32)

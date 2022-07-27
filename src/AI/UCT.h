@@ -24,9 +24,8 @@ void UCTMove(Board &CB, int Player, bool Msg);                         //*用UCT
 void deleteUCTNode(Node *Root); //*用于释放空间
 void deleteUCTTree(Node Root);  //*用于释放空间
 
-void UCTMoveWithSacrifice(Board &CB, int Player, bool Msg); //*包括UCT搜索前的预处理
-void latterSituationMove(Board &CB, int Player, bool Msg);  //*基于特殊结构体的决策，一般用于后期
-void gameTurnMove(Board &CB, int Player, bool Msg,int *status);         //*根据前后期自动移动
+void UCTMoveWithSacrifice(Board &CB, int Player, bool Msg);      //*包括UCT搜索前的预处理
+void latterSituationMove(Board &CB, int Player, bool Msg);       //*基于特殊结构体的决策，一般用于后期
+void gameTurnMove(Board &CB, int Player, bool Msg, int *status); //*根据前后期自动移动
 
-
-#endif //DOTS_AND_BOXES_UCT_H
+#endif // DOTS_AND_BOXES_UCT_H

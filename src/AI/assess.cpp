@@ -167,7 +167,7 @@ int BoxBoard::getFirstEmptyChainNum() //获取可用链空间的编号
 
 void BoxBoard::registerChain(LOC FreeBoxLoc, LOC FirstLoc) //动态注册链。一般仅从自由格出发
 {
-    cout << "进入registerChain" << endl;
+    // cout << "进入registerChain" << endl;
     int x = FreeBoxLoc.first;         //初始X值
     int y = FreeBoxLoc.second;        //初始Y值
     LOC Loc = FreeBoxLoc;             //设置起点坐标
@@ -223,7 +223,7 @@ void BoxBoard::registerChain(LOC FreeBoxLoc, LOC FirstLoc) //动态注册链。�
             cout << "长度为：" << Chains[Re].ChainBoxNum << "类型为：" << Chains[Re].Type << endl;
         }
     }
-    cout << "完成registerChain" << endl;
+    // cout << "完成registerChain" << endl;
 }
 
 LOC BoxBoard::findNextBox(LOC FoundBox, LOC LastBox)
@@ -265,16 +265,16 @@ LOC BoxBoard::findNextBox(LOC FoundBox, LOC LastBox)
 
 int BoxBoard::getBoxType(int bx, int by) //从棋盘上获取格子类型
 {
-    cout << "进入getBoxType" << endl;
+    // cout << "进入getBoxType" << endl;
     if (bx >= 1 && by >= 1 && bx <= BOXLEN && by <= BOXLEN) //满足格子要求
         return Boxes[bx][by].Type;
     return FREEBOX; //其余超出范围的均返回自由格
-    cout << "完成getBoxType" << endl;
+    // cout << "完成getBoxType" << endl;
 }
 
 void BoxBoard::defineAllChains(bool ChainPlus) //定义所有的链
 {
-    cout << "进入defineAllChains" << endl;
+    // cout << "进入defineAllChains" << endl;
     // defineBoxesType(); //首先定义所有格子的类型
     resetChainsInfo(); //重置链的数据
 
@@ -465,7 +465,7 @@ void BoxBoard::searchingCircle(LOC BoxLoc)
 
 void BoxBoard::registerCircle(LOC StartLoc, LOC NextLoc) //动态注册链.一般仅从自由格出发
 {
-    cout << "进入registerCircle函数" << endl;
+    // cout << "进入registerCircle函数" << endl;
     int x = StartLoc.first;           //初始X值
     int y = StartLoc.second;          //初始Y值
     LOC Loc = StartLoc;               //设置起点坐标
@@ -500,12 +500,12 @@ void BoxBoard::registerCircle(LOC StartLoc, LOC NextLoc) //动态注册链.一�
             Loc = mLoc;
         }
     }
-    cout << "完成registerCircle函数" << endl;
+    // cout << "完成registerCircle函数" << endl;
 }
 
 void BoxBoard::inheritChain(int InheritorRegNum, int AncesterRegNum)
 {
-    cout << "进入inheritChain函数" << endl;
+    // cout << "进入inheritChain函数" << endl;
     for (int j = 1; j <= BOXLEN; j++)
     {
         for (int i = 1; i <= BOXLEN; i++)
@@ -520,12 +520,11 @@ void BoxBoard::inheritChain(int InheritorRegNum, int AncesterRegNum)
     //销毁被继承者的注册空间
     Chains[AncesterRegNum].ChainBoxNum = 0;
     Chains[AncesterRegNum].Type = NotDefine;
-    cout << "完成inheritChain函数" << endl;
+    // cout << "完成inheritChain函数" << endl;
 }
 
 void BoxBoard::defineDeadChain()
 {
-    cout << "进入defineDeadChain函数" << endl;
     // defineBoxesType(); //首先定义所有格子的类型
     resetChainsInfo(); //重置链的数据
     for (int i = 1; i <= BOXLEN; i++)
@@ -540,12 +539,10 @@ void BoxBoard::defineDeadChain()
             }
         }
     }
-    cout << "完成defineDeadChain函数" << endl;
 }
 
 void BoxBoard::searchingDeadChain(LOC BoxLoc)
 {
-    cout << "进入searchingDeadChain" << endl;
     int Dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
     for (int n = 0; n < 4; n++)
     {
@@ -563,13 +560,12 @@ void BoxBoard::searchingDeadChain(LOC BoxLoc)
             }
         }
     }
-    cout << "完成searchingDeadChain" << endl;
 }
 
 void BoxBoard::registerDeadChain(LOC FreeBoxLoc, LOC FirstLoc)
 {
     //动态注册链。从一个格子出发 ，向一个格子开始进行链的注册。
-    cout << "进入registerDeadChain" << endl;
+    // cout << "进入registerDeadChain" << endl;
 
     int x = FreeBoxLoc.first;         //初始X值
     int y = FreeBoxLoc.second;        //初始Y值
@@ -611,7 +607,7 @@ void BoxBoard::registerDeadChain(LOC FreeBoxLoc, LOC FirstLoc)
         }
     }
 
-    cout << "完成registerDeadChain" << endl;
+    // cout << "完成registerDeadChain" << endl;
 }
 
 bool BoxBoard::captualShortestChain(int LatterPlayer)
