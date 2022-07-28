@@ -14,7 +14,13 @@
 //各种链的编号  未定义，长链，短链，环，预备环，死链，死环
 enum ChainType
 {
-	NotDefine, LongChain, ShortChain, Circle, PreCircle, DeadChain, DeadCircle
+    NotDefine,
+    LongChain,
+    ShortChain,
+    Circle,
+    PreCircle,
+    DeadChain,
+    DeadCircle
 };
 
 // 点
@@ -34,17 +40,17 @@ enum ChainType
 #define BLACK 1
 #define WHITE -1
 
-constexpr double C = 1;    //UCB 常数
+constexpr double C = 1; // UCB 常数
 //定义格子类型
-#define FULLBOX	0		//满格
-#define DEADBOX 1		//死格
-#define CHAINBOX 2		//链格
-#define FREEBOX 3		//自由格
-#define LEN 11      //棋盘数组长度
-#define BOXLEN 5	//格子数组长度
+#define FULLBOX 0  //满格
+#define DEADBOX 1  //死格
+#define CHAINBOX 2 //链格
+#define FREEBOX 3  //自由格
+#define LEN 11     //棋盘数组长度
+#define BOXLEN 5   //格子数组长度
 #define BOXNUM 25
 
-//UCT
+// UCT
 #define UCT_MC_TIMES 1
 #define UCT_TIMES 15000000
 #define UCT_LIMIT_TIME 32

@@ -4,9 +4,10 @@
 #include "element/Time.h"
 #include <SFML/Graphics.hpp>
 #include <future>
+#include <thread>
 struct Step
 {
-    int player;
+    int player = EMPTY;
     LOC action;
 };
 sf::RenderWindow mainWindow;
@@ -24,9 +25,9 @@ bool black_ai = false;
 bool white_ai = false;
 bool game_begin = false;
 
-vector<Step> steps;
+Step steps[60];
 int top = -1;
-
+vector<LOC> ai_steps;
 ////////显示左侧棋盘函数//////////
 void showGameBoard();
 void showVisualLine();
@@ -95,6 +96,7 @@ int main()
                 }
             }
         }
+        // cout<<"steps:"<<steps.size()<<endl;
         if (game_begin)
             AIMove();
         mainWindow.clear(sf::Color(66, 66, 66));
@@ -205,7 +207,7 @@ void showBox()
 void initSidebar()
 {
     ///////显示当前玩家////////
-    now_player.setFillColor(sf::Color(158,158,158));
+    now_player.setFillColor(sf::Color(158, 158, 158));
     now_player.setOutlineColor(sf::Color(183, 28, 28));
     now_player.setOutlineThickness(10);
     //////玩家切换////////
@@ -235,11 +237,15 @@ void showSidebar()
     showPrintBoard();
     showLoadBoard();
 }
-void showNowPlayer(){
-    if(nowPlayer==BLACK){
-        now_player.setPosition(1050,50);
-    }else{
-        now_player.setPosition(1250,50);
+void showNowPlayer()
+{
+    if (nowPlayer == BLACK)
+    {
+        now_player.setPosition(1050, 50);
+    }
+    else
+    {
+        now_player.setPosition(1250, 50);
     }
     mainWindow.draw(now_player);
 }
@@ -387,6 +393,7 @@ void handleButtons(int x, int y)
             nowPlayer = BLACK;
             black_time.reset();
             white_time.reset();
+            top = -1;
         }
         else
         {
@@ -407,9 +414,29 @@ void handleButtons(int x, int y)
     }
     else if (contains(redo_button, x, y))
     {
+        if (top != 60 && steps[top + 1].player != EMPTY)
+        {
+            int temp = steps[top + 1].player;
+            while (top != 60 && steps[top + 1].player != EMPTY && steps[top + 1].player == temp)
+            {
+                top++;
+                gameBoard->move(steps[top].player, steps[top].action);
+            }
+            nowPlayer = -temp;
+        }
     }
     else if (contains(undo_button, x, y))
     {
+        if (top != -1)
+        {
+            int temp = steps[top].player;
+            while (top != -1 && steps[top].player == temp)
+            {
+                gameBoard->unmove(steps[top].action);
+                top--;
+            }
+            nowPlayer = temp;
+        }
     }
     else if (contains(print_button, x, y))
     {
@@ -431,6 +458,9 @@ void handleBoard(int x, int y)
         {
             return;
         }
+        ////////记录步骤
+        steps[++top] = {nowPlayer, LOC{bx, by}};
+        //////占边
         if (gameBoard->move(nowPlayer, {bx, by}) == 0)
         {
             if (game_begin)
@@ -458,6 +488,9 @@ void handleBoard(int x, int y)
         {
             return;
         }
+        ////////记录步骤
+        steps[++top] = {nowPlayer, LOC{bx, by}};
+        //////占边
         if (gameBoard->move(nowPlayer, {bx, by}) == 0)
         {
             if (game_begin)
@@ -493,16 +526,18 @@ void AIMove()
         {
             if (black_ai)
             {
+                ai_steps.clear();
                 work = std::async(std::launch::async, gameTurnMove, std::ref(*gameBoard), std::ref(nowPlayer), false,
-                                  &status);
+                                  &status, std::ref(ai_steps));
             }
         }
         else
         {
             if (white_ai)
             {
+                ai_steps.clear();
                 work = std::async(std::launch::async, gameTurnMove, std::ref(*gameBoard), std::ref(nowPlayer), false,
-                                  &status);
+                                  &status, std::ref(ai_steps));
             }
         }
     }
@@ -519,6 +554,11 @@ void AIMove()
         {
             white_time.stop();
             black_time.start();
+        }
+        cout << "size: " << ai_steps.size() << endl;
+        for (auto &i : ai_steps)
+        {
+            steps[++top] = {nowPlayer, i};
         }
         nowPlayer = -nowPlayer;
         status = 0;

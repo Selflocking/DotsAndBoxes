@@ -29,7 +29,7 @@ Board::Board()
             }
         }
     }
-    turn = blackBox = whiteBox = 0;
+    blackBox = whiteBox = 0;
 }
 
 Board::Board(int Array[LEN][LEN])
@@ -39,6 +39,20 @@ Board::Board(int Array[LEN][LEN])
         for (int j = 0; j < LEN; j++)
         {
             map[i][j] = Array[i][j];
+        }
+    }
+    for (int i = 1; i < 11; i += 2)
+    {
+        for (int j = 1; j < 11; j += 2)
+        {
+            if (map[i][j] == BLACK)
+            {
+                blackBox++;
+            }
+            else if (map[i][j] == WHITE)
+            {
+                whiteBox++;
+            }
         }
     }
 }
@@ -444,7 +458,7 @@ int Board::getWinner() const
         return WHITE;
 }
 
-bool Board::getCTypeBoxLimit(int Player)
+bool Board::getCTypeBoxLimit(int Player, vector<LOC> &pace)
 {
     // 仅用在前期，用于在搜索的时候占领所有C型格
     for (int y = 1; y < LEN - 1; y = y + 2)
@@ -457,30 +471,26 @@ bool Board::getCTypeBoxLimit(int Player)
                 if ((map[x + 1][y] == HENG || map[x + 1][y] == SHU) && !getCTypeBoxBool(x + 2, y))
                 {
                     move(Player, {x + 1, y});
-                    lx = x + 1;
-                    ly = y;
-                    return true; // 占据之后就返回真
+                    pace.push_back({x + 1, y}); //**记录步伐
+                    return true;                // 占据之后就返回真
                 }
                 else if ((map[x - 1][y] == HENG || map[x - 1][y] == SHU) && !getCTypeBoxBool(x - 2, y))
                 {
                     move(Player, {x - 1, y});
-                    lx = x - 1;
-                    ly = y;
-                    return true; // 占据之后就返回真
+                    pace.push_back({x - 1, y}); //**记录步伐
+                    return true;                // 占据之后就返回真
                 }
                 else if ((map[x][y + 1] == HENG || map[x][y + 1] == SHU) && !getCTypeBoxBool(x, y + 2))
                 {
                     move(Player, {x, y + 1});
-                    lx = x;
-                    ly = y + 1;
-                    return true; // 占据之后就返回真
+                    pace.push_back({x, y + 1}); //**记录步伐
+                    return true;                // 占据之后就返回真
                 }
                 else if ((map[x][y - 1] == SHU || map[x][y - 1] == SHU) && !getCTypeBoxBool(x, y - 2))
                 {
                     move(Player, {x, y - 1});
-                    lx = x;
-                    ly = y - 1;
-                    return true; // 占据之后就返回真
+                    pace.push_back({x, y - 1}); //*记录步伐
+                    return true;                // 占据之后就返回真
                 }
             }
         }
@@ -506,6 +516,20 @@ void Board::setBoard(int Array[LEN][LEN])
         for (int j = 0; j < LEN; j++)
         {
             map[i][j] = Array[i][j];
+        }
+    }
+    for (int i = 1; i < 11; i += 2)
+    {
+        for (int j = 1; j < 11; j += 2)
+        {
+            if (map[i][j] == BLACK)
+            {
+                blackBox++;
+            }
+            else if (map[i][j] == WHITE)
+            {
+                whiteBox++;
+            }
         }
     }
 }
@@ -651,12 +675,25 @@ bool Board::getCTypeBoxBool(int bx, int by)
     return false;
 }
 
+void Board::eatAllCTypeBoxes(int Player, vector<LOC> &pace)
+{
+    LOC flag = {-1, -1};
+    for (;;) // 直到无法占据CTypeBox了就结束
+    {
+        LOC tmp = eatCBox(Player);
+        if (tmp == flag)
+            break;
+        else
+            pace.push_back(tmp); //**记录步伐
+    }
+}
 void Board::eatAllCTypeBoxes(int Player)
 {
     LOC flag = {-1, -1};
     for (;;) // 直到无法占据CTypeBox了就结束
     {
-        if (eatCBox(Player) == flag)
+        LOC tmp = eatCBox(Player);
+        if (tmp == flag)
             break;
     }
 }
@@ -763,16 +800,64 @@ void Board::unmove(LOC l)
     { // 横边
         if (l.first == 0)
         {
-            map[l.first + 1][l.second] = EMPTY;
+            switch (map[l.first + 1][l.second])
+            {
+            case BLACK:
+                blackBox--;
+                map[l.first + 1][l.second] = EMPTY;
+                break;
+            case WHITE:
+                whiteBox--;
+                map[l.first + 1][l.second] = EMPTY;
+                break;
+            default:
+                break;
+            }
         }
         else if (l.first == 10)
         {
-            map[l.first - 1][l.second] = EMPTY;
+            switch (map[l.first - 1][l.second])
+            {
+            case BLACK:
+                blackBox--;
+                map[l.first - 1][l.second] = EMPTY;
+                break;
+            case WHITE:
+                whiteBox--;
+                map[l.first - 1][l.second] = EMPTY;
+                break;
+            default:
+                break;
+            }
         }
         else
         {
-            map[l.first + 1][l.second] = EMPTY;
-            map[l.first - 1][l.second] = EMPTY;
+            switch (map[l.first + 1][l.second])
+            {
+            case BLACK:
+                blackBox--;
+                map[l.first + 1][l.second] = EMPTY;
+                break;
+            case WHITE:
+                whiteBox--;
+                map[l.first + 1][l.second] = EMPTY;
+                break;
+            default:
+                break;
+            }
+            switch (map[l.first - 1][l.second])
+            {
+            case BLACK:
+                blackBox--;
+                map[l.first - 1][l.second] = EMPTY;
+                break;
+            case WHITE:
+                whiteBox--;
+                map[l.first - 1][l.second] = EMPTY;
+                break;
+            default:
+                break;
+            }
         }
         map[l.first][l.second] = HENG;
     }
@@ -780,16 +865,64 @@ void Board::unmove(LOC l)
     { // 竖边
         if (l.second == 0)
         {
-            map[l.first][l.second + 1] = EMPTY;
+            switch (map[l.first][l.second + 1])
+            {
+            case BLACK:
+                blackBox--;
+                map[l.first][l.second + 1] = EMPTY;
+                break;
+            case WHITE:
+                whiteBox--;
+                map[l.first][l.second + 1] = EMPTY;
+                break;
+            default:
+                break;
+            }
         }
         else if (l.second == 10)
         {
-            map[l.first][l.second - 1] = EMPTY;
+            switch (map[l.first][l.second - 1])
+            {
+            case BLACK:
+                blackBox--;
+                map[l.first][l.second - 1] = EMPTY;
+                break;
+            case WHITE:
+                whiteBox--;
+                map[l.first][l.second - 1] = EMPTY;
+                break;
+            default:
+                break;
+            }
         }
         else
         {
-            map[l.first][l.second + 1] = EMPTY;
-            map[l.first][l.second - 1] = EMPTY;
+            switch (map[l.first][l.second + 1])
+            {
+            case BLACK:
+                blackBox--;
+                map[l.first][l.second + 1] = EMPTY;
+                break;
+            case WHITE:
+                whiteBox--;
+                map[l.first][l.second + 1] = EMPTY;
+                break;
+            default:
+                break;
+            }
+            switch (map[l.first][l.second - 1])
+            {
+            case BLACK:
+                blackBox--;
+                map[l.first][l.second - 1] = EMPTY;
+                break;
+            case WHITE:
+                whiteBox--;
+                map[l.first][l.second - 1] = EMPTY;
+                break;
+            default:
+                break;
+            }
         }
         map[l.first][l.second] = SHU;
     }
