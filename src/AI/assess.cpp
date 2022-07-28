@@ -1224,7 +1224,7 @@ int BoxBoard::getFreeMoves(LOC Moves[60])
 	for (int y = 1; y < LEN - 1; y = y + 2)
 	{
 		//先判定头部第一个格子与外界的边是否自由边
-		if (getFreeBoxBool(1, y) && (map[0][y]==HENG||map[0][y]==SHU))//第一个为交格而且与外界交互的边为空边
+		if (getFreeBoxBool(1, y) && (map[0][y]==HENG))//第一个为交格而且与外界交互的边为空边
 		{
 			if(getSaveAngleEdgeBool(1,y,st))
 			{
@@ -1238,7 +1238,7 @@ int BoxBoard::getFreeMoves(LOC Moves[60])
 		//循环判定中间的几个格子
 		for (int x = 1; x < LEN - 3; x = x + 2)//x轴
 		{
-			if (getFreeBoxBool(x, y) && getFreeBoxBool(x + 2, y) &&(map[x + 1][y]==HENG||map[x+1][y]==SHU))
+			if (getFreeBoxBool(x, y) && getFreeBoxBool(x + 2, y) &&(map[x + 1][y]==HENG))
 			{
                    Moves[MoveNum]={x + 1, y};//保存坐标
 				   MoveNum++;//总自由边数目自增1
@@ -1246,7 +1246,7 @@ int BoxBoard::getFreeMoves(LOC Moves[60])
 			st[x+1][y]=true;
 		}
 		//判断末尾的格子
-		if (getFreeBoxBool(LEN - 2, y) && (map[LEN - 1][y]==HENG||map[LEN-1][y]==SHU))//最后一个为交格且与外界交互的边为空边
+		if (getFreeBoxBool(LEN - 2, y) && (map[LEN - 1][y]==HENG))//最后一个为交格且与外界交互的边为空边
 		{
 			if(getSaveAngleEdgeBool(LEN-2,y,st))
 			{
@@ -1261,7 +1261,7 @@ int BoxBoard::getFreeMoves(LOC Moves[60])
 		//XY替换，再进行一次判定
 
 		//先判定头部第一个格子与外界的边是否自由边
-		if (getFreeBoxBool(y, 1) && (map[y][0]==HENG||map[y][0]==SHU))//第一个为交格而且与外界交互的边为空边
+		if (getFreeBoxBool(y, 1) && (map[y][0]==SHU))//第一个为交格而且与外界交互的边为空边
 		{
 			if(getSaveAngleEdgeBool(y,1,st))
 			{
@@ -1275,7 +1275,7 @@ int BoxBoard::getFreeMoves(LOC Moves[60])
 		//循环判定中间的几个格子
 		for (int x = 1; x < LEN - 3; x = x + 2)//x轴
 		{
-			if (getFreeBoxBool(y, x) && getFreeBoxBool(y, x + 2) && (map[y][x + 1]==HENG||map[y][x+1]==SHU))
+			if (getFreeBoxBool(y, x) && getFreeBoxBool(y, x + 2) && (map[y][x+1]==SHU))
 			{
 				Moves[MoveNum]={y, x + 1};//保存坐标
 				MoveNum++;//总自由边数目自增1
@@ -1283,7 +1283,7 @@ int BoxBoard::getFreeMoves(LOC Moves[60])
 			st[y][x+1]=true;
 		}
 		//判断末尾的格子
-		if (getFreeBoxBool(y, LEN - 2) && (map[y][LEN - 1]))//最后一个为交格且与外界交互的边为空边
+		if (getFreeBoxBool(y, LEN - 2) && (map[y][LEN - 1]==SHU))//最后一个为交格且与外界交互的边为空边
 		{
 			if(getSaveAngleEdgeBool(y,LEN-2,st))
 			{
