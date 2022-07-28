@@ -67,3 +67,10 @@ using std::fstream;
 using std::ios;
 using std::string;
 using std::vector;
+
+//step用于记录棋谱
+struct Step
+{
+    int player = EMPTY;
+    LOC action;
+};

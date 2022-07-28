@@ -5,11 +5,10 @@
 #include <SFML/Graphics.hpp>
 #include <future>
 #include <thread>
-struct Step
-{
-    int player = EMPTY;
-    LOC action;
-};
+#include "../src/CJSON/cJSON.h"
+#include "../src/CJSON/datarecorder.h"
+
+
 sf::RenderWindow mainWindow;
 sf::Font font;
 sf::Texture texture;
@@ -440,6 +439,11 @@ void handleButtons(int x, int y)
     }
     else if (contains(print_button, x, y))
     {
+        data_of_game ginfo= data_of_game(12,13,"aileft","airight");
+        ginfo.recordstep(steps);
+        ginfo.endrecord();
+        ginfo.printdata("aileft","airight","aileft");
+        ginfo.deleterecord();
     }
     else if (contains(load_button, x, y))
     {
