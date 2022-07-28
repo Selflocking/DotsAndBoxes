@@ -30,6 +30,10 @@ file(GLOB_RECURSE SOURCES
         src/AI/UCT.h
         src/element/Time.cpp
         src/element/Time.h
+        src/CJSON/cJSON.c
+        src/CJSON/cJSON.h
+        src/CJSON/datarecorder.cpp
+        src/CJSON/datarecorder.h
         )
 
 # 如果想要编译出来的程序不带控制台，使用这个
