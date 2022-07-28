@@ -40,7 +40,10 @@ Node::Node(int Player, int Array[LEN][LEN], bool GetCBox, int Filter_Range)
 
     int F = Win.getFreeEdgeNum();
     if (F >= Filter_Range)
-        TotalChild = getFreeMoves(NodeMoves); //提前计算总节点数
+    {
+         BoxBoard Test(map);
+         TotalChild = Test.getFreeMoves(NodeMoves); //提前计算总节点数
+    }
     else
     {
         BoxBoard Test(map);

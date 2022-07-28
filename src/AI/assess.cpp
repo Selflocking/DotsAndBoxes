@@ -71,81 +71,116 @@ void BoxBoard::resetChainsInfo() // 重置链与格的信息，不使用0号空�
 
 int BoxBoard::getFilterMoves(LOC Moves[60])
 {
-    bool st[LEN][LEN] = {0};
+	bool st[LEN][LEN]={0};
 
-    int MoveNum = 0;
-    for (int y = 0; y < LEN; y++)
-    {
-        for (int x = 0; x < LEN; x++)
-        {
-            if (map[x][y] == HENG || map[x][y] == SHU) // 若为空白边
-            {
-                int BoardSave[LEN][LEN];
-                boardCopy(map, BoardSave); // 保存一下
-                move(BLACK, {x, y});       // 玩家模拟走一步试试
+	int MoveNum = 0;
+	for (int y = 0; y < LEN; y++)
+	{
+		for (int x = 0; x < LEN; x++)
+		{
+			if (map[x][y] == HENG||map[x][y]==SHU)//若为空白边
+			{
+				int BoardSave[LEN][LEN];
+				boardCopy(map, BoardSave);	//保存一下
+				move(BLACK,{x, y});				//玩家模拟走一步试试
 
-                if (isOdd(x) && isEven(y)) // X奇数Y偶数，横行
-                {
-                    if (y == 0)
-                    {
-                        if (!getLongCTypeBoxBool(x, y + 1)) // 如果下面的那个格子没问题的话，这个招法也没问题
-                        {
-                            Moves[MoveNum] = {x, y};
-                            MoveNum++; // 总数目自增
-                        }
-                    }
-                    else if (y == LEN - 1)
-                    {
-                        if (!getLongCTypeBoxBool(x, y - 1)) // 如果上面的那个格子没问题的话，这个招法也没问题
-                        {
-                            Moves[MoveNum] = {x, y};
-                            MoveNum++; // 总数目自增
-                        }
-                    }
-                    else
-                    {
-                        if (!getLongCTypeBoxBool(x, y + 1) &&
-                            !getLongCTypeBoxBool(x, y - 1)) // 如果上下的格子都没问题的话，这个招法也没问题
-                        {
-                            Moves[MoveNum] = {x, y};
-                            MoveNum++; // 总数目自增
-                        }
-                    }
-                }
-                else // 竖行
-                {
-                    if (x == 0)
-                    {
-                        if (!getLongCTypeBoxBool(x + 1, y)) // 如果右边的那个格子没问题的话，这个招法也没问题
-                        {
-                            Moves[MoveNum] = {x, y};
-                            MoveNum++; // 总数目自增
-                        }
-                    }
-                    else if (x == LEN - 1)
-                    {
-                        if (!getLongCTypeBoxBool(x - 1, y)) // 如果左边的那个格子没问题的话，这个招法也没问题
-                        {
-                            Moves[MoveNum] = {x, y};
-                            MoveNum++; // 总数目自增
-                        }
-                    }
-                    else
-                    {
-                        if (!getLongCTypeBoxBool(x + 1, y) &&
-                            !getLongCTypeBoxBool(x - 1, y)) // 如果左右两边的格子都没问题的话，这个招法也没问题
-                        {
-                            Moves[MoveNum] = {x, y};
-                            MoveNum++; // 总数目自增
-                        }
-                    }
-                }
-                setBoard(BoardSave); // 还原
-            }
-        }
-    }
-
-    return MoveNum;
+				if (isOdd(x) && isEven(y))//X奇数Y偶数，横行
+				{
+					if (y == 0)
+					{
+						if (!getLongCTypeBoxBool(x, y + 1))//如果下面的那个格子没问题的话，这个招法也没问题
+						{
+							BoxBoard test(BoardSave);
+							if(test.getSaveChainEdgeBool(x,y+1,st)&&test.getSaveAngleEdgeBool(x,y+1,st))
+							{
+								Moves[MoveNum]={x, y};
+								MoveNum++;//总数目自增
+							}
+							// else
+							//   cout<<"("<<x<<","<<y<<")"<<endl;
+						}
+					}
+					else if (y == LEN - 1)
+					{
+						if (!getLongCTypeBoxBool(x, y - 1))//如果上面的那个格子没问题的话，这个招法也没问题
+						{
+							BoxBoard test(BoardSave);
+							if(test.getSaveChainEdgeBool(x,y-1,st)&&test.getSaveAngleEdgeBool(x,y-1,st))
+							{
+                               Moves[MoveNum]={x, y};
+							   MoveNum++;//总数目自增
+							}
+							// else
+							//   cout<<"("<<x<<","<<y<<")"<<endl;
+						}
+					}
+					else
+					{
+						if (!getLongCTypeBoxBool(x, y + 1) && !getLongCTypeBoxBool(x, y - 1))//如果上下的格子都没问题的话，这个招法也没问题
+						{
+							BoxBoard test(BoardSave);
+							if(test.getSaveChainEdgeBool(x,y+1,st)&&test.getSaveChainEdgeBool(x,y-1,st))
+							{
+                                Moves[MoveNum]={x, y};
+							    MoveNum++;//总数目自增
+							}
+							// else
+							//   cout<<"("<<x<<","<<y<<")"<<endl;
+						}
+					}
+				}
+				else//竖行
+				{
+					if (x == 0)
+					{
+						if (!getLongCTypeBoxBool(x + 1, y))//如果右边的那个格子没问题的话，这个招法也没问题
+						{
+							BoxBoard test(BoardSave);
+							if(test.getSaveChainEdgeBool(x+1,y,st)&&test.getSaveAngleEdgeBool(x+1,y,st))
+							{
+								Moves[MoveNum]={x, y};
+							    MoveNum++;//总数目自增
+							}
+							// else
+							//   cout<<"("<<x<<","<<y<<")"<<endl;
+						}
+					}
+					else if (x == LEN - 1)
+					{
+						if (!getLongCTypeBoxBool(x - 1, y))//如果左边的那个格子没问题的话，这个招法也没问题
+						{
+							BoxBoard test(BoardSave);
+							if(test.getSaveChainEdgeBool(x-1,y,st)&&test.getSaveAngleEdgeBool(x-1,y,st))
+							{
+                                Moves[MoveNum]={x, y};
+							    MoveNum++;//总数目自增
+							}	
+							// else
+							//   cout<<"("<<x<<","<<y<<")"<<endl;
+						}
+					}
+					else
+					{
+						if (!getLongCTypeBoxBool(x + 1, y) && !getLongCTypeBoxBool(x - 1, y))//如果左右两边的格子都没问题的话，这个招法也没问题
+						{
+							BoxBoard test(BoardSave);
+							if(test.getSaveChainEdgeBool(x+1,y,st)&&test.getSaveChainEdgeBool(x-1,y,st))
+							{
+                                Moves[MoveNum]={x, y};
+							    MoveNum++;//总数目自增
+							}
+							// else
+							//   cout<<"("<<x<<","<<y<<")"<<endl;
+						}
+					}
+				}
+				setBoard(BoardSave);			//还原
+				st[x][y]=true;
+			}
+		}
+	}
+    // system("pause");
+	return MoveNum;
 }
 
 void BoxBoard::searchingFromBox(LOC BoxLoc) // 从一个格出发，注册他的所有派生链，ChainPlus应在没有短链时启用
@@ -1094,4 +1129,171 @@ void BoxBoard::defineBoxesType() // 定义格子类型
                 Boxes[x][y].Type = bl; // 不然就跟自由边的数量是相同的。
         }
     }
+}
+
+bool BoxBoard::getSaveChainEdgeBool(int x,int y,bool st[LEN][LEN])//用于获得过滤可行边时，判断是否存下该条边
+{
+   if(!isOdd(x)||!isOdd(y))
+   {
+	  cout<<"判断是否要存边时:传入错误的坐标信息!"<<endl;
+	  return false;
+   }
+   defineAllChains(false);
+//    for(int i=01;i<25;i++)
+//    {
+// 	 if(Chains[i].Type==SingleChain)
+// 	 {
+//         cout<<i<<endl;
+// 	    cout<<Chains[i].StartLoc.x<<","<<Chains[i].StartLoc.y<<"到"<<Chains[i].EndLoc.x<<","<<Chains[i].EndLoc.y<<endl; 
+// 	 }
+//    }
+//    cout<<"  "<<endl;
+
+   int idx=Boxes[(x+1)/2][(y+1)/2].BelongingChainNum;
+   if(Chains[idx].Type==ShortChain&&Chains[idx].ChainBoxNum==1)//裁剪一格短链的等价边
+   {
+       int cnt=0;
+	   if((map[x][y-1]==HENG||map[x][y-1]==SHU)&&st[x][y-1]==false) cnt++;
+	   if((map[x+1][y]==HENG||map[x+1][y]==SHU)&&st[x+1][y]==false) cnt++;
+	   if((map[x][y+1]==HENG||map[x][y+1]==SHU)&&st[x][y+1]==false) cnt++;
+	   if((map[x-1][y]==HENG||map[x-1][y]==SHU)&&st[x-1][y]==false) cnt++;
+
+	   if(cnt==2) return true;
+	   if(cnt==1) return false;
+   }
+   else
+     return true;//若不是1格短链，无需等价裁边
+}
+
+bool BoxBoard::getSaveAngleEdgeBool(int x,int y,bool st[LEN][LEN])//对边角格子等价裁边
+{
+	int cnt=0;
+	if(x==1&&y==1)
+	{
+		if(getFreedom(x,y)==4)
+		{
+			if(st[x][y-1]==false) cnt++;
+			if(st[x-1][y]==false) cnt++;
+			if(cnt==2) return true;
+			if(cnt==1) return false;
+		}
+		return true;
+	}
+    if(x==9&&y==1)
+	{
+		if(getFreedom(x,y)==4)
+		{
+			if(st[x][y-1]==false) cnt++;
+			if(st[x+1][y]==false) cnt++;
+			if(cnt==2) return true;
+			if(cnt==1) return false;
+		}
+		return true;
+	}
+	if(x==1&&y==9)
+	{
+		if(getFreedom(x,y)==4)
+		{
+			if(st[x-1][y]==false) cnt++;
+			if(st[x][y+1]==false) cnt++;
+			if(cnt==2) return true;
+			if(cnt==1) return false;
+		}
+		return true;
+	}
+	if(x==9&&y==9)
+	{
+		if(getFreedom(x,y)==4)
+		{
+			if(st[x][y+1]==false) cnt++;
+			if(st[x+1][y]==false) cnt++;
+			if(cnt==2) return true;
+			if(cnt==1) return false;
+		}
+		return true;
+	}
+	return true;
+}
+
+int BoxBoard::getFreeMoves(LOC Moves[60])
+{
+	bool st[LEN][LEN]={0};
+	int MoveNum = 0;
+	//得到所有的自由边
+	//先判断所有竖边
+	for (int y = 1; y < LEN - 1; y = y + 2)
+	{
+		//先判定头部第一个格子与外界的边是否自由边
+		if (getFreeBoxBool(1, y) && (map[0][y]==HENG||map[0][y]==SHU))//第一个为交格而且与外界交互的边为空边
+		{
+			if(getSaveAngleEdgeBool(1,y,st))
+			{
+               	Moves[MoveNum]={0, y};//保存坐标
+			    MoveNum++;//总自由边数目自增1
+			}
+			// else
+			//   cout<<"("<<0<<","<<y<<")"<<endl;
+			st[0][y]=true;
+		}
+		//循环判定中间的几个格子
+		for (int x = 1; x < LEN - 3; x = x + 2)//x轴
+		{
+			if (getFreeBoxBool(x, y) && getFreeBoxBool(x + 2, y) &&(map[x + 1][y]==HENG||map[x+1][y]==SHU))
+			{
+                   Moves[MoveNum]={x + 1, y};//保存坐标
+				   MoveNum++;//总自由边数目自增1
+			}
+			st[x+1][y]=true;
+		}
+		//判断末尾的格子
+		if (getFreeBoxBool(LEN - 2, y) && (map[LEN - 1][y]==HENG||map[LEN-1][y]==SHU))//最后一个为交格且与外界交互的边为空边
+		{
+			if(getSaveAngleEdgeBool(LEN-2,y,st))
+			{
+               Moves[MoveNum]={LEN - 1, y};//保存坐标
+			   MoveNum++;//总自由边数目自增1
+			}
+			// else 
+			//    cout<<"("<<LEN-1<<","<<y<<")"<<endl;
+			st[LEN-1][y]=true;
+		}
+
+		//XY替换，再进行一次判定
+
+		//先判定头部第一个格子与外界的边是否自由边
+		if (getFreeBoxBool(y, 1) && (map[y][0]==HENG||map[y][0]==SHU))//第一个为交格而且与外界交互的边为空边
+		{
+			if(getSaveAngleEdgeBool(y,1,st))
+			{
+                Moves[MoveNum]={y, 0};//保存坐标
+			    MoveNum++;//总自由边数目自增1
+			}
+			// else
+			//   cout<<"("<<y<<","<<0<<")"<<endl;
+			st[y][0]=true;
+		}
+		//循环判定中间的几个格子
+		for (int x = 1; x < LEN - 3; x = x + 2)//x轴
+		{
+			if (getFreeBoxBool(y, x) && getFreeBoxBool(y, x + 2) && (map[y][x + 1]==HENG||map[y][x+1]==SHU))
+			{
+				Moves[MoveNum]={y, x + 1};//保存坐标
+				MoveNum++;//总自由边数目自增1
+			}
+			st[y][x+1]=true;
+		}
+		//判断末尾的格子
+		if (getFreeBoxBool(y, LEN - 2) && (map[y][LEN - 1]))//最后一个为交格且与外界交互的边为空边
+		{
+			if(getSaveAngleEdgeBool(y,LEN-2,st))
+			{
+                Moves[MoveNum]={y, LEN - 1};//保存坐标
+			    MoveNum++;//总自由边数目自增1
+			}
+			// else
+			//   cout<<"("<<y<<","<<LEN-1<<")"<<endl;
+			st[y][LEN-1]=true;
+		}
+	}
+	return MoveNum;//返回自由边的总数
 }

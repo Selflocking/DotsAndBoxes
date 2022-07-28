@@ -425,7 +425,7 @@ int rndFilterTurn(Board &CB, int Player, bool Msg, int Filter_Range)
     if (FreeEdge < Filter_Range)              //仅在FreeEdge数量小于25的情况下考虑Filter（过滤）
         MoveNum = Test.getFilterMoves(Moves); //确定这个局面下MoveNum的数量
     else
-        MoveNum = CB.getFreeMoves(Moves); //确定这个局面下MoveNum的数量
+        MoveNum =Test.getFreeMoves(Moves); //确定这个局面下MoveNum的数量
 
     if (MoveNum !=
         0) //在某些时候，由于吃掉了前面的C型格。可能导致MoveNum的数量为0.这时候只要跳过这一步自然就会开始判断胜利。

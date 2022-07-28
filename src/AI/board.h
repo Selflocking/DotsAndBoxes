@@ -42,7 +42,6 @@ class Board
     //计算
     LOC getDoubleCrossLoc(int Player); //*查找一个doublecross的制作方法，返回值为该边的坐标
     bool getCTypeBoxLimit(int Player, vector<LOC> &pace); //*限制版吃C型格
-    int getFreeMoves(LOC Moves[60]);                      //*得到所有的自由边，同时存下坐标
     int getFilterMoveNum();                               //*得到所有的过滤可行边的数量
 };
 

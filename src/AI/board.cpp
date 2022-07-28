@@ -605,63 +605,6 @@ int Board::getFilterMoveNum()
     return MoveNum;
 }
 
-int Board::getFreeMoves(LOC Moves[60])
-{
-    int MoveNum = 0;
-    // 得到所有的自由边
-    for (int y = 1; y < LEN - 1; y = y + 2)
-    {
-        // 先判定头部第一个格子与外界的边是否自由边
-        if (getFreeBoxBool(1, y) && (map[0][y] == HENG || map[0][y] == SHU)) // 第一个为交格而且与外界交互的边为空边
-        {
-            Moves[MoveNum] = {0, y}; // 保存坐标
-            MoveNum++;               // 总自由边数目自增1
-        }
-        // 循环判定中间的几个格子
-        for (int x = 1; x < LEN - 3; x = x + 2) // x轴
-        {
-            if (getFreeBoxBool(x, y) && getFreeBoxBool(x + 2, y) && (map[x + 1][y] == SHU || map[x + 1][y] == HENG))
-            {
-                Moves[MoveNum] = {x + 1, y}; // 保存坐标
-                MoveNum++;                   // 总自由边数目自增1
-            }
-        }
-        // 判断末尾的格子
-        if (getFreeBoxBool(LEN - 2, y) &&
-            (map[LEN - 1][y] == HENG || map[LEN - 1][y] == SHU)) // 最后一个为交格且与外界交互的边为空边
-        {
-            Moves[MoveNum] = {LEN - 1, y}; // 保存坐标
-            MoveNum++;                     // 总自由边数目自增1
-        }
-
-        // XY替换，再进行一次判定
-
-        // 先判定头部第一个格子与外界的边是否自由边
-        if (getFreeBoxBool(y, 1) && (map[y][0] == HENG || map[y][0] == SHU)) // 第一个为交格而且与外界交互的边为空边
-        {
-            Moves[MoveNum] = {y, 0}; // 保存坐标
-            MoveNum++;               // 总自由边数目自增1
-        }
-        // 循环判定中间的几个格子
-        for (int x = 1; x < LEN - 3; x = x + 2) // x轴
-        {
-            if (getFreeBoxBool(y, x) && getFreeBoxBool(y, x + 2) && (map[y][x + 1] == HENG || map[y][x + 1] == SHU))
-            {
-                Moves[MoveNum] = {y, x + 1}; // 保存坐标
-                MoveNum++;                   // 总自由边数目自增1
-            }
-        }
-        // 判断末尾的格子
-        if (getFreeBoxBool(y, LEN - 2) &&
-            (map[y][LEN - 1] == HENG || map[y][LEN - 1] == SHU)) // 最后一个为交格且与外界交互的边为空边
-        {
-            Moves[MoveNum] = {y, LEN - 1}; // 保存坐标
-            MoveNum++;                     // 总自由边数目自增1
-        }
-    }
-    return MoveNum; // 返回自由边的总数
-}
-
 bool Board::getCTypeBoxBool(int bx, int by)
 {
     //#注意的是，输入的X与Y是Box实际地址
