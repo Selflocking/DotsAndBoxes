@@ -1,3 +1,5 @@
+#include "../src/CJSON/cJSON.h"
+#include "../src/CJSON/datarecorder.h"
 #include "AI/UCT.h"
 #include "AI/board.h"
 #include "AI/define.h"
@@ -5,9 +7,6 @@
 #include <SFML/Graphics.hpp>
 #include <future>
 #include <thread>
-#include "../src/CJSON/cJSON.h"
-#include "../src/CJSON/datarecorder.h"
-
 
 sf::RenderWindow mainWindow;
 sf::Font font;
@@ -15,8 +14,9 @@ sf::Texture texture;
 sf::Sprite sprite;
 
 Board *gameBoard;
-
 int nowPlayer = BLACK;
+LOC nowMove = {-1, -1};
+
 Time black_time;
 Time white_time;
 
@@ -176,6 +176,23 @@ void showLine()
                 line.setPosition(j / 2 * 150 + 120, i / 2 * 150 + 140);
                 mainWindow.draw(line);
             }
+        }
+    }
+    if (nowMove.first != -1)
+    {
+        if (nowMove.first % 2 == 0) // 横线
+        {
+            sf::RectangleShape line(sf::Vector2f(120.f,2.f));
+            line.setFillColor(sf::Color::Red);
+            line.setPosition(nowMove.second/2*150+140,nowMove.first/2*150+124);
+            mainWindow.draw(line);
+        }
+        else // 竖线
+        {
+            sf::RectangleShape line(sf::Vector2f(2.f,120.f));
+            line.setFillColor(sf::Color::Red);
+            line.setPosition(nowMove.second/2*150+124,nowMove.first/2*150+140);
+            mainWindow.draw(line);
         }
     }
 }
@@ -393,6 +410,7 @@ void handleButtons(int x, int y)
             black_time.reset();
             white_time.reset();
             top = -1;
+            nowMove = {-1, -1};
         }
         else
         {
@@ -439,10 +457,10 @@ void handleButtons(int x, int y)
     }
     else if (contains(print_button, x, y))
     {
-        data_of_game ginfo= data_of_game(12,13,"aileft","airight");
+        data_of_game ginfo = data_of_game(12, 13, "aileft", "airight");
         ginfo.recordstep(steps);
         ginfo.endrecord();
-        ginfo.printdata("aileft","airight","aileft");
+        ginfo.printdata("aileft", "airight", "aileft");
         ginfo.deleterecord();
     }
     else if (contains(load_button, x, y))
@@ -464,6 +482,7 @@ void handleBoard(int x, int y)
         }
         ////////记录步骤
         steps[++top] = {nowPlayer, LOC{bx, by}};
+        nowMove = {bx,by};
         //////占边
         if (gameBoard->move(nowPlayer, {bx, by}) == 0)
         {
@@ -494,6 +513,7 @@ void handleBoard(int x, int y)
         }
         ////////记录步骤
         steps[++top] = {nowPlayer, LOC{bx, by}};
+        nowMove = {bx,by};
         //////占边
         if (gameBoard->move(nowPlayer, {bx, by}) == 0)
         {
@@ -564,6 +584,7 @@ void AIMove()
         {
             steps[++top] = {nowPlayer, i};
         }
+        nowMove = ai_steps.back();
         nowPlayer = -nowPlayer;
         status = 0;
     }
