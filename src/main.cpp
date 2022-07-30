@@ -8,6 +8,10 @@
 #include <future>
 #include <thread>
 
+
+string BlackName = "R";
+string WhiteName = "B";
+
 sf::RenderWindow mainWindow;
 sf::Font font;
 sf::Texture texture;
@@ -457,10 +461,10 @@ void handleButtons(int x, int y)
     }
     else if (contains(print_button, x, y))
     {
-        data_of_game ginfo = data_of_game(12, 13, "aileft", "airight");
+        data_of_game ginfo= data_of_game(gameBoard->blackBox,gameBoard->whiteBox,BlackName,WhiteName);
         ginfo.recordstep(steps);
         ginfo.endrecord();
-        ginfo.printdata("aileft", "airight", "aileft");
+        ginfo.printdata();
         ginfo.deleterecord();
     }
     else if (contains(load_button, x, y))

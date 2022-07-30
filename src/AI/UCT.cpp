@@ -3,9 +3,11 @@
 #include "assess.h"
 #include "board.h"
 #include "define.h"
+#include <mutex>
 #include <random>
 #include <thread>
 
+std::mutex mtx;
 
 int getBoardWinner(Board &CB, int LatterPlayer)
 {
@@ -78,15 +80,37 @@ int getFilterMCWinner(Board &CB, int NextPlayer, int Filter_Range)
     return W;
 }
 
+void multi_thread_func(Board &CB, int &a, int NextPlayer, int Winner, int Filter_Range)
+{
+    if (getFilterMCWinner(CB, NextPlayer, Filter_Range) == Winner) //#传入的是后续玩家#
+    {
+        mtx.lock();
+        a++;
+        mtx.unlock();
+    }
+}
+
 float getFilterMCEvalution(Board &CB, int NextPlayer, int Winner, int TIMES, int Filter_Range)
 {
     Board MCB = CB; //先复制一个棋盘
     int MCE = 0;
+    int threadnum = 11;
+    thread ths[11];
+    //当前版本为11线程并行模拟
     for (int i = 0; i < TIMES; i++)
     {
         if (getFilterMCWinner(MCB, NextPlayer, Filter_Range) == Winner) //#传入的是后续玩家#
             MCE++;
     }
+    // for (int i = 0; i < threadnum; i++)
+    // {
+    //     ths[i] = thread(multi_thread_func, ref(MCB), ref(MCE), NextPlayer, Winner, Filter_Range);
+    // }
+    // for (int i = 0; i < threadnum; i++)
+    // {
+    //     ths[i].join();
+    // }
+    // float score = ((float)MCE) / ((float)threadnum);
     float score = ((float)MCE) / ((float)TIMES);
     return score;
 }

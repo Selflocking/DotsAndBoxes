@@ -104,7 +104,7 @@ int Board::move(int player, LOC l)
     // 如果传进来的坐标不是边，输出
     if (!isFreeLine(l))
     {
-        cerr << "Board::move(LOC l): " << l.first << " " << l.second << "\n";
+        // cerr << "Board::move(LOC l): " << l.first << " " << l.second << "\n";
         return 0;
     }
     if (map[l.first][l.second] == HENG)
