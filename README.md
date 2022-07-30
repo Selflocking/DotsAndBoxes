@@ -51,8 +51,9 @@ tasks.json:
 2. 进入项目目录，新建`build`文件夹，将`3rdparty/SFML/bin`文件夹中的`dll`文件复制到刚刚新建的`build`文件夹中，将`res`目录复制进`build`目录中
 3. 回到项目目录，打开命令行执行
 ```bash
-g++ src/*.cpp src/AI/*.cpp -o build/game.exe -I ./3rdparty/SFML/include -L./3rdparty/SFML/lib -lsfml-graphics -lsfml-window -lsfml-system
+g++ src/*.cpp src/AI/*.cpp src/element/*.cpp src/CJSON/*.cpp src/CJSON/*.h src/CJSON/*.c -o build/game.exe -I ./3rdparty/SFML/include -L./3rdparty/SFML/lib -lsfml-graphics -lsfml-window -lsfml-system
 ```
+
 4. 进入`build`文件夹，即可看到`game.exe`, 执行即可。
 ### 使用CMake (推荐)
 首先安装[CMake](https://github.com/Kitware/CMake/releases/download/v3.24.0-rc4/cmake-3.24.0-rc4-windows-x86_64.msi)
