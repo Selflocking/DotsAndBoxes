@@ -77,6 +77,6 @@ Node *Node::expandUCTNode(int MC_Times, int Filter_Range)
 
     //做一次MC评估
     CB.setBoard(NewB->map);
-    NewB->AvgValue = getFilterMCEvalution(CB, -Owner, Owner, MC_Times, Filter_Range);
+    NewB->AvgValue = (getFilterMCEvalution(CB, -Owner, Owner, MC_Times, Filter_Range)+13)/26;
     return NewB; //返回NewB的地址
 }

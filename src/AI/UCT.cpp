@@ -19,6 +19,20 @@ int getBoardWinner(Board &CB, int LatterPlayer)
     return w;
 }
 
+int getBoardWinner(Board &CB, int LatterPlayer,int &score)
+{
+    LOC a[60];
+    BoxBoard Advanced(CB);
+    if (Advanced.getFilterMoves(a) != 0)//未到终局
+    {
+       score=Advanced.getPlayerBoxes(LatterPlayer);//score为该节点的父结点拥有者即LatterPlayer得到格子数
+       return 0;
+    }
+    //到终局
+    int w = Advanced.getBoardWinner(LatterPlayer,score);//score为该节点的父结点拥有者即LatterPlayer得到格子数
+    return w;
+}
+
 void preProcess2(Node *node)
 {
     /*
@@ -80,6 +94,17 @@ int getFilterMCWinner(Board &CB, int NextPlayer, int Filter_Range)
     return W;
 }
 
+int getFilterMCWinner(Board &CB, int NextPlayer, int Filter_Range,int &score)
+{
+   int player = NextPlayer;
+    while (CB.getFreeEdgeNum() != 0) //当还存在自由边的时候
+    {
+        player = rndFilterTurn(CB, player, false, Filter_Range); //#传入后续玩家#
+    }
+    int W = getBoardWinner(CB, -player,score);
+    return W;
+}
+
 void multi_thread_func(Board &CB, int &a, int NextPlayer, int Winner, int Filter_Range)
 {
     if (getFilterMCWinner(CB, NextPlayer, Filter_Range) == Winner) //#传入的是后续玩家#
@@ -93,14 +118,17 @@ void multi_thread_func(Board &CB, int &a, int NextPlayer, int Winner, int Filter
 float getFilterMCEvalution(Board &CB, int NextPlayer, int Winner, int TIMES, int Filter_Range)
 {
     Board MCB = CB; //先复制一个棋盘
-    int MCE = 0;
+    int MCE=0;//每次模拟所得收益值的总和
     int threadnum = 11;
     thread ths[11];
     //当前版本为11线程并行模拟
     for (int i = 0; i < TIMES; i++)
     {
-        if (getFilterMCWinner(MCB, NextPlayer, Filter_Range) == Winner) //#传入的是后续玩家#
-            MCE++;
+        int CNT=0;//每次模拟该节点的父结点拥有者获得格子数
+        int WIN=0;//每次模拟的结果，0或1
+        if (getFilterMCWinner(MCB, NextPlayer, Filter_Range,CNT) == Winner) //#传入的是后续玩家#
+          WIN++;
+        MCE+=WIN+CNT-13;
     }
     // for (int i = 0; i < threadnum; i++)
     // {

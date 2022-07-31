@@ -1086,6 +1086,55 @@ int BoxBoard::getBoardWinner(int LatterPlayer)
         return getWinner();
 }
 
+int BoxBoard::getBoardWinner(int LatterPlayer,int &score)
+{
+    if (getFilterMoveNum() > 0)
+        cout << "Wrong";
+    int player = LatterPlayer;
+    defineBoxesType();
+
+    LOC BoxNum;
+    for (;;) // 非理性情况下吞并所有
+    {
+        defineAllChains(true);             // 先定义为完全状态判定一次
+        BoxNum = getRationalStateBoxNum(); // 然后再判定一次理性情况
+        if (rationalState(BoxNum))
+            break;
+        else
+        {
+            if (!captualShortestChain(player)) // 如果吃不下去了也退出
+                break;
+            else
+                player = -player;
+        }
+    }
+    if (getWinner() == 0) // 也就是还没胜利
+    {
+        int r, b;
+        if (player == BLACK)
+        {
+            r = BoxNum.first + getPlayerBoxes(BLACK); // 玩家是红方，则加上除去牺牲剩余的格子数
+            b = BoxNum.second + getPlayerBoxes(WHITE);
+            score=r;//score为该节点的父结点拥有者即player获得的格子数
+        }
+        else
+        {
+            r = BoxNum.second + getPlayerBoxes(BLACK);
+            b = BoxNum.first + getPlayerBoxes(WHITE); // 玩家是蓝方，则加上牺牲剩余的格子数
+            score=b;//score为该节点的父结点拥有者即player获得的格子数
+        }
+        if (r > b)
+            return BLACK;
+        else
+            return WHITE;
+    }
+    else
+    {
+        score=getPlayerBoxes(player);//score为该节点的父结点拥有者即player获得的格子数
+        return getWinner();
+    }
+}
+
 bool BoxBoard::getDeadChainExist()
 {
     defineDeadChain();
@@ -1275,7 +1324,7 @@ int BoxBoard::getFreeMoves(LOC Moves[60])
 		//循环判定中间的几个格子
 		for (int x = 1; x < LEN - 3; x = x + 2)//x轴
 		{
-			if (getFreeBoxBool(y, x) && getFreeBoxBool(y, x + 2) && (map[y][x+1]==SHU))
+			if (getFreeBoxBool(y, x) && getFreeBoxBool(y, x + 2) && (map[y][x + 1]==SHU))
 			{
 				Moves[MoveNum]={y, x + 1};//保存坐标
 				MoveNum++;//总自由边数目自增1

@@ -16,11 +16,13 @@ using std::mutex;
 using std::ref;
 
 int getBoardWinner(Board &CB, int LatterPlayer); //*得到或者预测当前局面胜利者
+int getBoardWinner(Board &CB, int LatterPlayer,int &score); //*得到或者预测当前局面胜利者
 
 // FilterMC，
 float getFilterMCEvalution(Board &CB, int NextPlayer, int Winner, int TIMES, int Filter_Range);
 //*在扩展子节点时，为子节点初次评估一个收益
 int getFilterMCWinner(Board &CB, int NextPlayer, int Filter_Range);   //*返回模拟的胜负结果
+int getFilterMCWinner(Board &CB, int NextPlayer, int Filter_Range,int &score);   //*返回模拟的胜负结果
 int rndFilterTurn(Board &CB, int Player, bool Msg, int Filter_Range); //*用于模拟时随机占边
 
 float UCTProcess(Node &B, int &Total, int MC_Times, int Filter_Range); //*uct搜索
