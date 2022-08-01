@@ -4,6 +4,7 @@ project(dots_and_boxes)
 # 设定语言标准
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 IF(WIN32)
 # 定义第三方库路径
 set(SFML_DIR 3rdparty/SFML/lib/cmake/SFML)

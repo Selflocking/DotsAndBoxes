@@ -19,7 +19,6 @@ Node::Node()
 
 Node::Node(int Player, int Array[LEN][LEN], bool GetCBox, int Filter_Range)
 {
-    vector<LOC> tmp;
     //初始化棋盘
     for (int i = 0; i < LEN; i++)
     {
@@ -29,7 +28,7 @@ Node::Node(int Player, int Array[LEN][LEN], bool GetCBox, int Filter_Range)
         }
     }
     if (GetCBox)
-        eatAllCTypeBoxes(Player, tmp); //先全部吃掉C型格，此时的Node自动跃迁为Gotten Node
+        eatAllCTypeBoxes(Player); //先全部吃掉C型格，此时的Node自动跃迁为Gotten Node
 
     //然后开始初始化数据
     Owner = Player;                             //这个节点的拥有者是传入的数据
@@ -41,8 +40,8 @@ Node::Node(int Player, int Array[LEN][LEN], bool GetCBox, int Filter_Range)
     int F = Win.getFreeEdgeNum();
     if (F >= Filter_Range)
     {
-         BoxBoard Test(map);
-         TotalChild = Test.getFreeMoves(NodeMoves); //提前计算总节点数
+        BoxBoard Test(map);
+        TotalChild = Test.getFreeMoves(NodeMoves); //提前计算总节点数
     }
     else
     {
@@ -65,7 +64,7 @@ float Node::refreshAvgValue()
 
 float Node::getUCBValue(int Total)
 {
-    return AvgValue + sqrt((((log10((float)Total)) * 2) / (float)Times));
+    return AvgValue + sqrt((((log((float)Total)) * 2) / (float)Times));
 }
 
 Node *Node::expandUCTNode(int MC_Times, int Filter_Range)
@@ -77,6 +76,6 @@ Node *Node::expandUCTNode(int MC_Times, int Filter_Range)
 
     //做一次MC评估
     CB.setBoard(NewB->map);
-    NewB->AvgValue = (getFilterMCEvalution(CB, -Owner, Owner, MC_Times, Filter_Range)+13)/26;
+    NewB->AvgValue = (getFilterMCEvalution(CB, -Owner, Owner, MC_Times, Filter_Range) + 13) / 26;
     return NewB; //返回NewB的地址
 }

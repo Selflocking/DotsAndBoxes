@@ -19,17 +19,17 @@ int getBoardWinner(Board &CB, int LatterPlayer)
     return w;
 }
 
-int getBoardWinner(Board &CB, int LatterPlayer,int &score)
+int getBoardWinner(Board &CB, int LatterPlayer, int &score)
 {
     LOC a[60];
     BoxBoard Advanced(CB);
-    if (Advanced.getFilterMoves(a) != 0)//未到终局
+    if (Advanced.getFilterMoves(a) != 0) //未到终局
     {
-       score=Advanced.getPlayerBoxes(LatterPlayer);//score为该节点的父结点拥有者即LatterPlayer得到格子数
-       return 0;
+        score = Advanced.getPlayerBoxes(LatterPlayer); // score为该节点的父结点拥有者即LatterPlayer得到格子数
+        return 0;
     }
     //到终局
-    int w = Advanced.getBoardWinner(LatterPlayer,score);//score为该节点的父结点拥有者即LatterPlayer得到格子数
+    int w = Advanced.getBoardWinner(LatterPlayer, score); // score为该节点的父结点拥有者即LatterPlayer得到格子数
     return w;
 }
 
@@ -94,14 +94,14 @@ int getFilterMCWinner(Board &CB, int NextPlayer, int Filter_Range)
     return W;
 }
 
-int getFilterMCWinner(Board &CB, int NextPlayer, int Filter_Range,int &score)
+int getFilterMCWinner(Board &CB, int NextPlayer, int Filter_Range, int &score)
 {
-   int player = NextPlayer;
+    int player = NextPlayer;
     while (CB.getFreeEdgeNum() != 0) //当还存在自由边的时候
     {
         player = rndFilterTurn(CB, player, false, Filter_Range); //#传入后续玩家#
     }
-    int W = getBoardWinner(CB, -player,score);
+    int W = getBoardWinner(CB, -player, score);
     return W;
 }
 
@@ -118,17 +118,17 @@ void multi_thread_func(Board &CB, int &a, int NextPlayer, int Winner, int Filter
 float getFilterMCEvalution(Board &CB, int NextPlayer, int Winner, int TIMES, int Filter_Range)
 {
     Board MCB = CB; //先复制一个棋盘
-    int MCE=0;//每次模拟所得收益值的总和
-    int threadnum = 11;
-    thread ths[11];
+    int MCE = 0;    //每次模拟所得收益值的总和
+    // int threadnum = 11;
+    // thread ths[11];
     //当前版本为11线程并行模拟
     for (int i = 0; i < TIMES; i++)
     {
-        int CNT=0;//每次模拟该节点的父结点拥有者获得格子数
-        int WIN=0;//每次模拟的结果，0或1
-        if (getFilterMCWinner(MCB, NextPlayer, Filter_Range,CNT) == Winner) //#传入的是后续玩家#
-          WIN++;
-        MCE+=WIN+CNT-13;
+        int CNT = 0; //每次模拟该节点的父结点拥有者获得格子数
+        int WIN = 0; //每次模拟的结果，0或1
+        if (getFilterMCWinner(MCB, NextPlayer, Filter_Range, CNT) == Winner) //#传入的是后续玩家#
+            WIN++;
+        MCE += WIN + CNT - 13;
     }
     // for (int i = 0; i < threadnum; i++)
     // {
@@ -222,23 +222,23 @@ void UCTMove(Board &CB, int Player, bool Msg, vector<LOC> &pace)
         CB.move(Player, {UCTB.NodeMoves[BestNodeNum].first, UCTB.NodeMoves[BestNodeNum].second});
         pace.push_back({UCTB.NodeMoves[BestNodeNum].first, UCTB.NodeMoves[BestNodeNum].second}); //**记录步伐
 
-        if (Msg)
-        {
-            cout << UCTB.NodeMoves[BestNodeNum].first << "," << UCTB.NodeMoves[BestNodeNum].second << " " << Player
-                 << endl;
-            cout << "========================Infomation==========================\n";
-            cout << "当前节点平均收益为" << 1 - UCTB.AvgValue << endl;
-            if (BestNodeNum == LargerTimesNodeNum)
-                cout << "最大访问与最佳收益相同！\n";
-            else
-                cout << "最大访问不等同于最佳收益！\n";
-            cout << "最佳收益节点访问为" << UCTB.ChildNodes[BestNodeNum]->Times << endl;
-            cout << "最佳收益节点收益为" << UCTB.ChildNodes[BestNodeNum]->AvgValue << endl;
-            cout << "最多访问节点访问为" << UCTB.ChildNodes[LargerTimesNodeNum]->Times << endl;
-            cout << "最多访问节点收益为" << UCTB.ChildNodes[LargerTimesNodeNum]->AvgValue << endl;
-            cout << "本次UCT总迭代次数为" << Total << endl;
-            cout << "============================================================\n";
-        }
+        // if (Msg)
+        // {
+        //     cout << UCTB.NodeMoves[BestNodeNum].first << "," << UCTB.NodeMoves[BestNodeNum].second << " " << Player
+        //          << endl;
+        //     cout << "========================Infomation==========================\n";
+        //     cout << "当前节点平均收益为" << 1 - UCTB.AvgValue << endl;
+        //     if (BestNodeNum == LargerTimesNodeNum)
+        //         cout << "最大访问与最佳收益相同！\n";
+        //     else
+        //         cout << "最大访问不等同于最佳收益！\n";
+        //     cout << "最佳收益节点访问为" << UCTB.ChildNodes[BestNodeNum]->Times << endl;
+        //     cout << "最佳收益节点收益为" << UCTB.ChildNodes[BestNodeNum]->AvgValue << endl;
+        //     cout << "最多访问节点访问为" << UCTB.ChildNodes[LargerTimesNodeNum]->Times << endl;
+        //     cout << "最多访问节点收益为" << UCTB.ChildNodes[LargerTimesNodeNum]->AvgValue << endl;
+        //     cout << "本次UCT总迭代次数为" << Total << endl;
+        //     cout << "============================================================\n";
+        // }
         //释放内存
         deleteUCTTree(UCTB);
     }
@@ -273,7 +273,6 @@ void UCTMoveWithSacrifice(Board &CB, int Player, bool Msg, vector<LOC> &pace)
 {
 
     BoxBoard Dead(CB);
-    vector<LOC> tmp = pace;
     bool DeadChain = Dead.getDeadChainExist();
     bool DeadCircle = Dead.getDeadCircleExist();
     if (DeadCircle || DeadChain) //有环的情况优先处理
@@ -285,7 +284,7 @@ void UCTMoveWithSacrifice(Board &CB, int Player, bool Msg, vector<LOC> &pace)
             SacrificeBoxNum = 4;
 
         //假设全部都吃掉了
-        Dead.eatAllCTypeBoxes(Player, tmp);         //此处传的第二个参数无意义
+        Dead.eatAllCTypeBoxes(Player);              //此处传的第二个参数无意义
         LOC BoxNum = Dead.getEarlyRationalBoxNum(); // x是先手的，y是后手的
         //现在根据接下来局面的估值函数来进行分析
         if (BoxNum.first - BoxNum.second <= SacrificeBoxNum) //放弃控制
@@ -369,14 +368,14 @@ void latterSituationMove(Board &CB, int Player, vector<LOC> &pace)
         //假设全部都吃掉了
         Dead.eatAllCTypeBoxes(Player);              //此处传的第二个参数无意义
         LOC BoxNum = Dead.getRationalStateBoxNum(); // x是先手的，y是后手的
-        cout << "BoxNum:" << BoxNum.first << " " << BoxNum.second << endl;
-        cout << "Sacri:" << SacrificeBoxNum << endl;
+        // cout << "BoxNum:" << BoxNum.first << " " << BoxNum.second << endl;
+        // cout << "Sacri:" << SacrificeBoxNum << endl;
         //现在根据接下来局面能得到的格子数来进行分析
         //假设在当前链全被消灭后后手可以拿到x个，先手可以拿到y个。我方全吃后可以拿到y+n，对方拿到x个。若x-y<n则我方全吃
         if (BoxNum.first - BoxNum.second <= SacrificeBoxNum || Dead.getWinner() != EMPTY)
         {
             //放弃控制
-            cout << "Winner:" << Dead.getWinner() << endl;
+            // cout << "Winner:" << Dead.getWinner() << endl;
             CB.eatAllCTypeBoxes(Player, pace); //**记录步伐
             if (Dead.getWinner() == EMPTY)
                 latterSituationMove(CB, Player, pace); //**记录步伐
@@ -468,8 +467,7 @@ void gameTurnMove(Board &CB, int Player, bool Msg, int *status, vector<LOC> &pac
 int rndFilterTurn(Board &CB, int Player, bool Msg, int Filter_Range)
 {
     LOC Moves[60];
-    vector<LOC> t;
-    CB.eatAllCTypeBoxes(Player, t); //此处第二个参数无实际意义
+    CB.eatAllCTypeBoxes(Player); //此处第二个参数无实际意义
 
     BoxBoard Test = CB;
     int MoveNum;
@@ -477,11 +475,12 @@ int rndFilterTurn(Board &CB, int Player, bool Msg, int Filter_Range)
     if (FreeEdge < Filter_Range)              //仅在FreeEdge数量小于25的情况下考虑Filter（过滤）
         MoveNum = Test.getFilterMoves(Moves); //确定这个局面下MoveNum的数量
     else
-        MoveNum =Test.getFreeMoves(Moves); //确定这个局面下MoveNum的数量
+        MoveNum = Test.getFreeMoves(Moves); //确定这个局面下MoveNum的数量
 
     if (MoveNum !=
         0) //在某些时候，由于吃掉了前面的C型格。可能导致MoveNum的数量为0.这时候只要跳过这一步自然就会开始判断胜利。
     {
+        srand(time(nullptr));
         int Rnd = rand() % MoveNum; //在0-MoveNum中抽取一个随机数
         CB.move(Player, {Moves[Rnd].first, Moves[Rnd].second});
         return -Player; //换手

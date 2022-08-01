@@ -1,16 +1,17 @@
-#include <iostream>
-#include <fstream>
-#include <cstring>
-#include <wchar.h>
-#include "cJSON.h"
 #include "../AI/define.h"
+#include "cJSON.h"
+#include <cstring>
+#include <fstream>
+#include <iostream>
+#include <wchar.h>
+
 
 using namespace std;
 
 class data_of_game
 {
 
-public:
+  public:
     cJSON *root;  // json根节点
     cJSON *piece; // json落子信息数组节点
     cJSON *objarr;

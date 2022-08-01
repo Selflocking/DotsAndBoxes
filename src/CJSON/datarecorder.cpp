@@ -40,7 +40,6 @@ data_of_game::data_of_game(int a, int b, string p1, string p2)
     res = ctime(&t1);
     cJSON_AddStringToObject(root, "Date", "2022-08-5");
     cJSON_AddStringToObject(root, "Event", "2022 CCGC");
-
 }
 
 void data_of_game::recordstep(Step v[60]) // x行y列
@@ -74,7 +73,7 @@ void data_of_game::printdata()
     filename = filename + ps + " " + winner + ".txt";
     out.open(filename, ios::out);
     out << json_data;
-    cout << filename;
+    // cout << filename;
     out.close();
 }
 

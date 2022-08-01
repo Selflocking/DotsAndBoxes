@@ -8,7 +8,6 @@
 #include <future>
 #include <thread>
 
-
 string BlackName = "R";
 string WhiteName = "B";
 
@@ -186,16 +185,16 @@ void showLine()
     {
         if (nowMove.first % 2 == 0) // 横线
         {
-            sf::RectangleShape line(sf::Vector2f(120.f,2.f));
+            sf::RectangleShape line(sf::Vector2f(120.f, 2.f));
             line.setFillColor(sf::Color::Red);
-            line.setPosition(nowMove.second/2*150+140,nowMove.first/2*150+124);
+            line.setPosition(nowMove.second / 2 * 150 + 140, nowMove.first / 2 * 150 + 124);
             mainWindow.draw(line);
         }
         else // 竖线
         {
-            sf::RectangleShape line(sf::Vector2f(2.f,120.f));
+            sf::RectangleShape line(sf::Vector2f(2.f, 120.f));
             line.setFillColor(sf::Color::Red);
-            line.setPosition(nowMove.second/2*150+124,nowMove.first/2*150+140);
+            line.setPosition(nowMove.second / 2 * 150 + 124, nowMove.first / 2 * 150 + 140);
             mainWindow.draw(line);
         }
     }
@@ -461,7 +460,7 @@ void handleButtons(int x, int y)
     }
     else if (contains(print_button, x, y))
     {
-        data_of_game ginfo= data_of_game(gameBoard->blackBox,gameBoard->whiteBox,BlackName,WhiteName);
+        data_of_game ginfo = data_of_game(gameBoard->blackBox, gameBoard->whiteBox, BlackName, WhiteName);
         ginfo.recordstep(steps);
         ginfo.endrecord();
         ginfo.printdata();
@@ -486,7 +485,7 @@ void handleBoard(int x, int y)
         }
         ////////记录步骤
         steps[++top] = {nowPlayer, LOC{bx, by}};
-        nowMove = {bx,by};
+        nowMove = {bx, by};
         //////占边
         if (gameBoard->move(nowPlayer, {bx, by}) == 0)
         {
@@ -517,7 +516,7 @@ void handleBoard(int x, int y)
         }
         ////////记录步骤
         steps[++top] = {nowPlayer, LOC{bx, by}};
-        nowMove = {bx,by};
+        nowMove = {bx, by};
         //////占边
         if (gameBoard->move(nowPlayer, {bx, by}) == 0)
         {
@@ -583,7 +582,7 @@ void AIMove()
             white_time.stop();
             black_time.start();
         }
-        cout << "size: " << ai_steps.size() << endl;
+        // cout << "size: " << ai_steps.size() << endl;
         for (auto &i : ai_steps)
         {
             steps[++top] = {nowPlayer, i};

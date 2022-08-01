@@ -871,7 +871,7 @@ void Board::unmove(LOC l)
     }
     else
     {
-        cout << "error: Board::unmove()" << endl;
+        // cout << "error: Board::unmove()" << endl;
     }
 }
 bool Board::ifHaveSafeEdge()
