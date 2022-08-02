@@ -17,7 +17,7 @@ Node::Node()
     TotalChild = 0;
 }
 
-Node::Node(int Player, int Array[LEN][LEN], bool GetCBox, int Filter_Range)
+Node::Node(int Player, int Array[LEN][LEN], bool GetCBox)
 {
     //初始化棋盘
     for (int i = 0; i < LEN; i++)
@@ -38,7 +38,7 @@ Node::Node(int Player, int Array[LEN][LEN], bool GetCBox, int Filter_Range)
     ExistChild = 0;                             //已经存在的子节点数为0
 
     int F = Win.getFreeEdgeNum();
-    if (F >= Filter_Range)
+    if (F >= UCT_FILTER_RANGE)
     {
         BoxBoard Test(map);
         TotalChild = Test.getFreeMoves(NodeMoves); //提前计算总节点数
@@ -67,15 +67,15 @@ float Node::getUCBValue(int Total)
     return AvgValue + sqrt((((log((float)Total)) * 2) / (float)Times));
 }
 
-Node *Node::expandUCTNode(int MC_Times, int Filter_Range)
+Node *Node::expandUCTNode()
 {
     //创建新节点
     Board CB(map);
     CB.move(Owner, {NodeMoves[ExistChild].first, NodeMoves[ExistChild].second});
-    Node *NewB = new Node(-Owner, CB.map, true, Filter_Range);
+    Node *NewB = new Node(-Owner, CB.map, true);
 
     //做一次MC评估
     CB.setBoard(NewB->map);
-    NewB->AvgValue = (getFilterMCEvalution(CB, -Owner, Owner, MC_Times, Filter_Range) + 13) / 26;
+    NewB->AvgValue = (getFilterMCEvalution(CB, -Owner, Owner) + 13) / 26;
     return NewB; //返回NewB的地址
 }

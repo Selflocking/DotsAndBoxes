@@ -3,10 +3,15 @@
 #include "assess.h"
 #include "board.h"
 #include "define.h"
+#include <ctime>
 #include <mutex>
 #include <random>
 #include <thread>
 
+
+using std::mutex;
+using std::ref;
+using std::thread;
 std::mutex mtx;
 
 int getBoardWinner(Board &CB, int LatterPlayer)
@@ -33,81 +38,31 @@ int getBoardWinner(Board &CB, int LatterPlayer, int &score)
     return w;
 }
 
-void preProcess2(Node *node)
-{
-    /*
-     * 假设终局有一个长链，在长链的中间插入边会形成两个长C
-     */
-    /*
-     * 长链即使不是最后一个也可以吃完
-     */
-    /* 预处理1
-     * 双交不得不吃
-     * 两格短C可以选择不吃
-     * 三个短C可以吃完也可以留双交
-     * 四格及以上长C除非下完棋局结束否则留双交
-     * 四个死环要么占满，要么留两个双交
-     * 六格死环应该是可以吃完或者留两个双交？
-     * 八格及以上死环除非下完棋局结束否则留两个双交
-     *
-     * 当然，也有可能对方比较傻，提前开长链，暂不考虑
-     */
-    /*预处理2:
-     * 如果我们是先手并且场上目前没有两格短链，那么我们应该先开环，再开长链，
-     * 因为开环，对手如果想保持控制权，必须给我们留两个双交，而开长链，对手只能留双交
-     */
-
-    /* 拓展节点：
-     * 两格短链和双交是交换先后手的关键
-     */
-    /*拓展节点：
-     * 对于链与环相交，必须下链中的边，这样可以将链和环分割开来，因为如果我们在环中下边，这个特殊结构会转变成死树，利好对手
-     *
-     * 对于环与环相交，每个环里的边为等价边，如果两个环相同，则整个结构中所有边为等价边
-     *
-     * 对于链与链相交，每个链里的边为等价边，如果组成的链长度相同，则整个结构中所有边为等价边
-     */
-
-    /*特殊结构判断
-     * 简单的特殊结构为长链和环，
-     * 长链的每一个格子自由度都为2，但是头尾不是同一个格子
-     * 环的每一个格子自由度都为2，但是头尾是同一个格子
-     *
-     * 复杂的特殊结构为链与环相交（包括一格的链与环相交），链与链相交，环与环相交
-     * 交叉处的格子自由度等于周围链格和环格的数目和
-     */
-    /*特殊结构判断：
-     * 对于更为复杂的情况，比如一条链既与链相交，又与环相交，
-     * 还是能分割成更小的部分进行处理
-     * 这就要求，存储特殊结构时，并不是将诸如链与链这样的特殊结构整个存储，而是存下单独的链和环，使用相交点来判断是否为复杂的特殊结构
-     */
-}
-
-int getFilterMCWinner(Board &CB, int NextPlayer, int Filter_Range)
+int getFilterMCWinner(Board &CB, int NextPlayer)
 {
     int player = NextPlayer;
     while (CB.getFreeEdgeNum() != 0) //当还存在自由边的时候
     {
-        player = rndFilterTurn(CB, player, false, Filter_Range); //#传入后续玩家#
+        player = rndFilterTurn(CB, player, false); //#传入后续玩家#
     }
     int W = getBoardWinner(CB, -player);
     return W;
 }
 
-int getFilterMCWinner(Board &CB, int NextPlayer, int Filter_Range, int &score)
+int getFilterMCWinner(Board &CB, int NextPlayer, int &score)
 {
     int player = NextPlayer;
     while (CB.getFreeEdgeNum() != 0) //当还存在自由边的时候
     {
-        player = rndFilterTurn(CB, player, false, Filter_Range); //#传入后续玩家#
+        player = rndFilterTurn(CB, player, false); //#传入后续玩家#
     }
     int W = getBoardWinner(CB, -player, score);
     return W;
 }
 
-void multi_thread_func(Board &CB, int &a, int NextPlayer, int Winner, int Filter_Range)
+void multi_thread_func(Board &CB, int &a, int NextPlayer, int Winner)
 {
-    if (getFilterMCWinner(CB, NextPlayer, Filter_Range) == Winner) //#传入的是后续玩家#
+    if (getFilterMCWinner(CB, NextPlayer) == Winner) //#传入的是后续玩家#
     {
         mtx.lock();
         a++;
@@ -115,35 +70,35 @@ void multi_thread_func(Board &CB, int &a, int NextPlayer, int Winner, int Filter
     }
 }
 
-float getFilterMCEvalution(Board &CB, int NextPlayer, int Winner, int TIMES, int Filter_Range)
+float getFilterMCEvalution(Board &CB, int NextPlayer, int Winner)
 {
     Board MCB = CB; //先复制一个棋盘
     int MCE = 0;    //每次模拟所得收益值的总和
     // int threadnum = 11;
     // thread ths[11];
     //当前版本为11线程并行模拟
-    for (int i = 0; i < TIMES; i++)
+    for (int i = 0; i < UCT_MC_TIMES; i++)
     {
         int CNT = 0; //每次模拟该节点的父结点拥有者获得格子数
         int WIN = 0; //每次模拟的结果，0或1
-        if (getFilterMCWinner(MCB, NextPlayer, Filter_Range, CNT) == Winner) //#传入的是后续玩家#
+        if (getFilterMCWinner(MCB, NextPlayer, CNT) == Winner) //#传入的是后续玩家#
             WIN++;
         MCE += WIN + CNT - 13;
     }
     // for (int i = 0; i < threadnum; i++)
     // {
-    //     ths[i] = thread(multi_thread_func, ref(MCB), ref(MCE), NextPlayer, Winner, Filter_Range);
+    //     ths[i] = thread(multi_thread_func, ref(MCB), ref(MCE), NextPlayer, Winner, UCT_FILTER_RANGE);
     // }
     // for (int i = 0; i < threadnum; i++)
     // {
     //     ths[i].join();
     // }
     // float score = ((float)MCE) / ((float)threadnum);
-    float score = ((float)MCE) / ((float)TIMES);
+    float score = ((float)MCE) / ((float)UCT_MC_TIMES);
     return score;
 }
 
-float UCTProcess(Node &B, int &Total, int MC_Times, int Filter_Range) //#Total 尝试次数#
+float UCTProcess(Node &B, int &Total) //#Total 尝试次数#
 {
     B.Times++;              //访问的次数增加一次
     if (B.BoardWinner != 0) //如果游戏已经结束了#叶节点#
@@ -157,10 +112,10 @@ float UCTProcess(Node &B, int &Total, int MC_Times, int Filter_Range) //#Total �
     }
     if (B.ExistChild < B.TotalChild) //如果还有未尝试过的节点
     {
-        Total++; //基准情形，本次迭代结束，尝试次数+1。
-        B.ChildNodes[B.ExistChild] = B.expandUCTNode(MC_Times, Filter_Range); //扩展一个子节点
-        B.ExistChild++;                                                       //子节点的数目自增1
-        B.refreshAvgValue();                                                  //刷新收益
+        Total++;                                        //基准情形，本次迭代结束，尝试次数+1。
+        B.ChildNodes[B.ExistChild] = B.expandUCTNode(); //扩展一个子节点
+        B.ExistChild++;                                 //子节点的数目自增1
+        B.refreshAvgValue();                            //刷新收益
         return B.AvgValue;
     }
     else //说明没有未尝试过的节点
@@ -177,7 +132,7 @@ float UCTProcess(Node &B, int &Total, int MC_Times, int Filter_Range) //#Total �
                 BestUCBValue = UCBValue[i];
             }
         }
-        UCTProcess(*B.ChildNodes[BestNodeNum], Total, MC_Times, Filter_Range);
+        UCTProcess(*B.ChildNodes[BestNodeNum], Total);
         B.refreshAvgValue();
         return B.AvgValue;
     }
@@ -186,18 +141,17 @@ float UCTProcess(Node &B, int &Total, int MC_Times, int Filter_Range) //#Total �
 
 void UCTMove(Board &CB, int Player, bool Msg, vector<LOC> &pace)
 {
-    Node UCTB = Node(Player, CB.map, true, UCT_FILTER_RANGE); //根据当前局面创建UCT的根节点
+    Node UCTB = Node(Player, CB.map, true); //根据当前局面创建UCT的根节点
     if (UCTB.BoardWinner == 0)
     {
         int Total = 0; // UCT的次数函数
-        clock_t start; //设置计时器的变量
-        start = clock();
+        clock_t start = clock(); //设置计时器的变量
+        
         for (int i = 0; i < UCT_TIMES; i++) //迭代一定次数
         {
-            UCTProcess(UCTB, Total, UCT_MC_TIMES, UCT_FILTER_RANGE);
+            UCTProcess(UCTB, Total);
 
-            double totaltime = (double)(clock() - start) / CLOCKS_PER_SEC;
-            if (totaltime >= UCT_LIMIT_TIME)
+            if ((clock() - start) / CLOCKS_PER_SEC >= UCT_LIMIT_TIME)
                 break;
         }
         //判定最佳收益
@@ -464,7 +418,7 @@ void gameTurnMove(Board &CB, int Player, bool Msg, int *status, vector<LOC> &pac
     *status = 1;
 }
 
-int rndFilterTurn(Board &CB, int Player, bool Msg, int Filter_Range)
+int rndFilterTurn(Board &CB, int Player, bool Msg)
 {
     LOC Moves[60];
     CB.eatAllCTypeBoxes(Player); //此处第二个参数无实际意义
@@ -472,7 +426,7 @@ int rndFilterTurn(Board &CB, int Player, bool Msg, int Filter_Range)
     BoxBoard Test = CB;
     int MoveNum;
     int FreeEdge = CB.getFreeEdgeNum();
-    if (FreeEdge < Filter_Range)              //仅在FreeEdge数量小于25的情况下考虑Filter（过滤）
+    if (FreeEdge < UCT_FILTER_RANGE)          //仅在FreeEdge数量小于25的情况下考虑Filter（过滤）
         MoveNum = Test.getFilterMoves(Moves); //确定这个局面下MoveNum的数量
     else
         MoveNum = Test.getFreeMoves(Moves); //确定这个局面下MoveNum的数量

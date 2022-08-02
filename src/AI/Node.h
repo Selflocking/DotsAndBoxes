@@ -19,12 +19,12 @@ class Node : public Board
     Node *ChildNodes[60]; //指向第一个子节点的指针
 
     Node();                                                                //构造函数
-    Node(int Player, int Array[LEN][LEN], bool GetCBox, int Filter_Range); //*构造函数
+    Node(int Player, int Array[LEN][LEN], bool GetCBox); //*构造函数
 
     //功能函数
     float refreshAvgValue();                             //*更新平均收益
     float getUCBValue(int Total);                        //*根据现在的平均收益而获得UCB值
-    Node *expandUCTNode(int MC_Times, int Filter_Range); //*扩展节点
+    Node *expandUCTNode(); //*扩展节点
 };
 
 #endif // DOTS_AND_BOXES_NODE_H
