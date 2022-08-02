@@ -1,7 +1,3 @@
-//
-// Created by YunShu on 2022/7/27.
-//
-
 #include "Time.h"
 void Time::begin()
 {

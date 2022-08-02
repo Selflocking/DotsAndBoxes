@@ -1,4 +1,7 @@
 #include "datarecorder.h"
+#include<fstream>
+using std::fstream;
+using std::ios;
 
 data_of_game::data_of_game(int a, int b, string p1, string p2)
 {

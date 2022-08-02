@@ -5,8 +5,7 @@
 #include <iostream>
 #include <wchar.h>
 
-
-using namespace std;
+using std::string;
 
 class data_of_game
 {

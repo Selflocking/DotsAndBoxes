@@ -1,5 +1,7 @@
 #include "define.h"
 #include <functional>
+#include <vector>
+using std::vector;
 #pragma once
 class Board
 {

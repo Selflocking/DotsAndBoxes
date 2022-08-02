@@ -1,13 +1,7 @@
 /*
  *此头文件是存放一些常用的宏定义
  */
-#include <algorithm>
-#include <cstdint>
-#include <cstring>
-#include <ctime>
-#include <iostream>
 #include <utility>
-#include <vector>
 
 #pragma once
 
@@ -57,16 +51,8 @@ constexpr int UCT_LIMIT_TIME = 32;
 constexpr int UCT_FILTER_RANGE = 30;
 
 // 一些常用的
-// 不适用using namespace std,是为了防止和std空间里的命名冲突
+// 不使用using namespace std,是为了防止和std空间里的命名冲突
 using LOC = std::pair<int, int>;
-using std::cerr;
-using std::cin;
-using std::cout;
-using std::endl;
-using std::fstream;
-using std::ios;
-using std::string;
-using std::vector;
 
 // step用于记录棋谱
 struct Step

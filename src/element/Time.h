@@ -1,6 +1,3 @@
-//
-// Created by YunShu on 2022/7/27.
-//
 #include <ctime>
 #ifndef DOTS_AND_BOXES_TIME_H
 #define DOTS_AND_BOXES_TIME_H
