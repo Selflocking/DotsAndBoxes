@@ -8,8 +8,8 @@
 #include <future>
 #include <thread>
 
-string BlackName = "R";
-string WhiteName = "B";
+const char * BlackName = "人工智障A";
+const char * WhiteName = "人工智障B";
 
 sf::RenderWindow mainWindow;
 sf::Font font;
@@ -285,7 +285,7 @@ void showInformation()
     mainWindow.draw(x_score);
     mainWindow.draw(h_score);
     ////////显示时间/////////
-    string tem;
+    std::string tem;
     time_t b_time = black_time.get();
     if (b_time > 60)
     {

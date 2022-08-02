@@ -5,9 +5,11 @@ project(dots_and_boxes)
 set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 IF(WIN32)
 # 定义第三方库路径
 set(SFML_DIR 3rdparty/SFML/lib/cmake/SFML)
+set(nowide_DIR 3rdparty/nowide/lib/cmake/nowide)
 ENDIF()
 
 # 如需静态链接SFML请取消下句注释
@@ -16,7 +18,7 @@ ENDIF()
 # 查找第三方库
 find_package(SFML 2.5 COMPONENTS
         system window graphics REQUIRED)
-
+find_package(nowide)
 # 声明 SOURCES
 file(GLOB_RECURSE SOURCES
         src/main.cpp
@@ -46,6 +48,7 @@ add_executable(dots_and_boxes ${SOURCES})
 IF(WIN32)
 target_include_directories(dots_and_boxes PUBLIC 3rdparty/SFML/include)
 ENDIF()
+target_include_directories(dots_and_boxes PUBLIC 3rdparty/nowide/include)
 
 #如需静态链接
 #set(CMAKE_EXE_LINKER_FLAGS "-static")

@@ -3,9 +3,6 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <wchar.h>
-
-using std::string;
 
 class data_of_game
 {
@@ -14,13 +11,13 @@ class data_of_game
     cJSON *root;  // json根节点
     cJSON *piece; // json落子信息数组节点
     cJSON *objarr;
-    string winner;
-    string win;
-    string pf;
-    string ps;
+    const char *winner; //胜者
+    const char *win;
+    const char *pf; //先手名字
+    const char *ps; //后手名字
 
     //创建json记录器，需要输入先后手得分，时间，先后手玩家名字，胜者名字
-    data_of_game(int a, int b, string p1, string p2);
+    data_of_game(int a, int b, const char *p1, const char *p2);
 
     // 录入步骤信息传入vector<step>
     void recordstep(Step v[60]);

@@ -1,47 +1,50 @@
 #include "datarecorder.h"
-#include<fstream>
+#include <fstream>
+#include <sec_api/wchar_s.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+#include <swprintf.inl>
+#include <time.h>
+#include <nowide/convert.hpp>
 using std::fstream;
 using std::ios;
 
-data_of_game::data_of_game(int a, int b, string p1, string p2)
+data_of_game::data_of_game(int a, int b, const char *p1, const char *p2)
 {
     root = cJSON_CreateObject(); // json根节点
     piece = cJSON_CreateArray(); // json落子信息数组节点
-    const char *tem = p1.c_str();
-    const char *tem2 = p2.c_str();
-    const char *tem3;
-    cJSON_AddStringToObject(root, "R", tem);
+    cJSON_AddStringToObject(root, "R", p1);
     this->pf = p1;
-    cJSON_AddStringToObject(root, "B", tem2);
+    cJSON_AddStringToObject(root, "B", p2);
     this->ps = p2;
     if (a + b == 25)
     {
         if (a > b)
         {
-            winner = "R";
+            winner = "先手胜";
             win = "R";
-            tem3 = "R";
         }
         else
         {
-            winner = "B";
+            winner = "后手胜";
             win = "B";
-            tem3 = "B";
         }
     }
     else
     {
-        winner = "U";
+        winner = "比赛未完成";
         win = "U";
-        tem3 = "U";
     }
-    cJSON_AddStringToObject(root, "winner", tem3);
+    cJSON_AddStringToObject(root, "winner", win);
     cJSON_AddNumberToObject(root, "RScore", a);
     cJSON_AddNumberToObject(root, "BScore", b);
-    time_t t1 = time(nullptr);
-    char *res;
-    res = ctime(&t1);
-    cJSON_AddStringToObject(root, "Date", "2022-08-5");
+    time_t now = time(nullptr);
+    tm *date = localtime(&now);
+    char buf[24];
+    sprintf(buf, "%d-%d-%d", date->tm_year, date->tm_mon, date->tm_mday);
+    cJSON_AddStringToObject(root, "Date", buf);
     cJSON_AddStringToObject(root, "Event", "2022 CCGC");
 }
 
@@ -51,7 +54,7 @@ void data_of_game::recordstep(Step v[60]) // x行y列
     {
         if (v[i].player == EMPTY)
             continue;
-        string tem;
+        std::string tem;
         tem += v[i].player == -1 ? "b(" : "r(";
         tem += (v[i].action.second / 2 + 'a');
         tem += (6 - ((v[i].action.first + 1) / 2) + '0');
@@ -72,9 +75,20 @@ void data_of_game::printdata()
 {
     char *json_data = cJSON_PrintUnformatted(root);
     fstream out;
-    string filename = "DB " + pf + " vs ";
-    filename = filename + ps + " " + winner + ".txt";
-    out.open(filename, ios::out);
+    // string filename = "DB " + pf + " vs ";
+    // filename = filename + ps + " " + winner + ".txt";
+    // std::wstring buf;
+    // buf+=L"DB： ";
+
+    // wchar_t buf[64];
+    // swprintf_s(buf, L"DB：%s vs %s ：%s.txt", pf, ps, winner);
+    // wprintf(L"%s",buf);
+    setlocale ( LC_ALL, "chs" );
+    char buf[64];
+    sprintf(buf, "DB：%s vs %s ：%s.txt", pf, ps, winner);
+    // wchar_t tem[64];
+    // mbstowcs(tem, buf, 64);
+    out.open(nowide::widen(buf).c_str(), ios::out);
     out << json_data;
     // cout << filename;
     out.close();
