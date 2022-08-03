@@ -8,11 +8,11 @@
 #include <random>
 #include <thread>
 
-
 using std::mutex;
 using std::ref;
 using std::thread;
 std::mutex mtx;
+std::mt19937_64 rng(std::random_device{}());
 
 int getBoardWinner(Board &CB, int LatterPlayer)
 {
@@ -144,9 +144,9 @@ void UCTMove(Board &CB, int Player, bool Msg, vector<LOC> &pace)
     Node UCTB = Node(Player, CB.map, true); //根据当前局面创建UCT的根节点
     if (UCTB.BoardWinner == 0)
     {
-        int Total = 0; // UCT的次数函数
+        int Total = 0;           // UCT的次数函数
         clock_t start = clock(); //设置计时器的变量
-        
+
         for (int i = 0; i < UCT_TIMES; i++) //迭代一定次数
         {
             UCTProcess(UCTB, Total);
@@ -434,8 +434,7 @@ int rndFilterTurn(Board &CB, int Player, bool Msg)
     if (MoveNum !=
         0) //在某些时候，由于吃掉了前面的C型格。可能导致MoveNum的数量为0.这时候只要跳过这一步自然就会开始判断胜利。
     {
-        srand(time(nullptr));
-        int Rnd = rand() % MoveNum; //在0-MoveNum中抽取一个随机数
+        int Rnd = rng() % MoveNum; //在0-MoveNum中抽取一个随机数
         CB.move(Player, {Moves[Rnd].first, Moves[Rnd].second});
         return -Player; //换手
     }
