@@ -2,15 +2,26 @@
 #include "AI/UCT.h"
 #include "AI/board.h"
 #include "AI/define.h"
-#include <corecrt.h>
+#include "CJSON/datarecorder.h"
 #include <iostream>
+#include <string>
 #include <vector>
 
 using std::cin;
 using std::cout;
 using std::endl;
 using std::string;
+
+string name = "SingleThread"; //程序名字
+bool recordBoard = 0;         //是否打印棋盘
+
 Board *brd;
+Step steps[60];
+int top = -1;
+
+string BlackName;
+string WhiteName;
+
 int temp = 0;
 // 其中"name?","new","move","end","quit","error"为平台向引擎传递命令；
 // "name","move"为引擎向平台传递命令字
@@ -36,35 +47,41 @@ int main()
                 t += message[i + 2];
                 // 占线
                 brd->move(-ai, change(t));
+                steps[++top] = {-ai == BLACK ? BLACK : WHITE, change(t)};
             }
-            vector<LOC> steps;
-            gameTurnMove(*brd, ai, false, &temp, steps);
+            vector<LOC> moves;
+            gameTurnMove(*brd, ai, false, &temp, moves);
             string res;
-            for (auto const &i : steps)
+            for (auto const &i : moves)
             {
                 res += change(i);
+                steps[++top] = {ai == BLACK ? BLACK : WHITE, i};
             }
-             cout << "move " << res.size() / 3 << " " << res << endl;
+            cout << "move " << res.size() / 3 << " " << res << endl;
         }
         else if (message == "name?")
         {
-            cout << "name singleThread" << endl;
+            cout << "name " << name << endl;
         }
         else if (message == "new")
         {
+            time_t now = time(NULL);
+            BlackName = std::to_string(localtime(&now)->tm_min);
             cin >> message;
             brd = new Board;
+            top = -1;
             if (message == "black")
             {
                 ai = BLACK;
-                vector<LOC> steps;
-                gameTurnMove(*brd, ai, false, &temp, steps);
+                vector<LOC> moves;
+                gameTurnMove(*brd, ai, false, &temp, moves);
                 string res;
-                for (auto const &i : steps)
+                for (auto const &i : moves)
                 {
                     res += change(i);
+                    steps[++top] = {BLACK, i};
                 }
-                 cout << "move " << res.size() / 3 << " " << res << endl;
+                cout << "move " << res.size() / 3 << " " << res << endl;
             }
             else
             {
@@ -77,7 +94,14 @@ int main()
         }
         else if (message == "end")
         {
+            time_t now = time(NULL);
+            WhiteName = std::to_string(localtime(&now)->tm_min);
             delete brd;
+            data_of_game ginfo = data_of_game(brd->blackBox, brd->whiteBox, BlackName.c_str(), WhiteName.c_str());
+            ginfo.recordstep(steps);
+            ginfo.endrecord();
+            ginfo.printdata();
+            ginfo.deleterecord();
         }
         else if (message == "quit")
         {
