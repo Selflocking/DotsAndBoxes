@@ -1,13 +1,7 @@
 #include "datarecorder.h"
 #include <fstream>
-#include <sec_api/wchar_s.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <string>
-#include <swprintf.inl>
-#include <time.h>
 #include <nowide/convert.hpp>
+
 using std::fstream;
 using std::ios;
 
@@ -75,19 +69,8 @@ void data_of_game::printdata()
 {
     char *json_data = cJSON_PrintUnformatted(root);
     fstream out;
-    // string filename = "DB " + pf + " vs ";
-    // filename = filename + ps + " " + winner + ".txt";
-    // std::wstring buf;
-    // buf+=L"DB： ";
-
-    // wchar_t buf[64];
-    // swprintf_s(buf, L"DB：%s vs %s ：%s.txt", pf, ps, winner);
-    // wprintf(L"%s",buf);
-    setlocale ( LC_ALL, "chs" );
     char buf[64];
     sprintf(buf, "DB：%s vs %s ：%s.txt", pf, ps, winner);
-    // wchar_t tem[64];
-    // mbstowcs(tem, buf, 64);
     out.open(nowide::widen(buf).c_str(), ios::out);
     out << json_data;
     // cout << filename;

@@ -64,7 +64,7 @@ float Node::refreshAvgValue()
 
 float Node::getUCBValue(int Total)
 {
-    return AvgValue + sqrt((((log((float)Total)) * 2) / (float)Times));
+    return AvgValue + sqrt((log(Total) * 2) / Times);
 }
 
 Node *Node::expandUCTNode()

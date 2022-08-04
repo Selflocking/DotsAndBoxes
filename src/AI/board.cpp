@@ -1,5 +1,4 @@
 #include "board.h"
-#include <random>
 
 /**
  * @brief 默认构造函数，分为DOT，BOX，HENG，SHU。
@@ -294,73 +293,6 @@ bool Board::ifMakeCBox(LOC l)
 }
 
 /**
- * @brief 打印当前局面
- *
- * @details 按值显示棋面
- *
- * @todo 需要改进成更加直观的显示方法
- */
-void Board::print()
-{
-    for (auto &i : map)
-    {
-        for (int j : i)
-        {
-            printf("%2d ", j);
-        }
-        // cout << "\n";
-    }
-}
-
-void Board::traverseEdge(std::function<void(int i, int j)> const &f) const
-{
-    for (int i = 1; i < 11; i += 2)
-    {
-        for (int j = 0; j < 11; j += 2)
-        {
-            if (map[i][j] != OCCLINE)
-            {
-                f(i, j);
-            }
-        }
-    }
-    for (int i = 0; i < 11; i += 2)
-    {
-        for (int j = 1; j < 11; j += 2)
-        {
-            if (map[i][j] != OCCLINE)
-            {
-                f(i, j);
-            }
-        }
-    }
-}
-
-void Board::traverseEdge(const std::function<void(LOC)> &f) const
-{
-    for (int i = 1; i < 11; i += 2)
-    {
-        for (int j = 0; j < 11; j += 2)
-        {
-            if (map[i][j] != OCCLINE)
-            {
-                f(LOC{i, j});
-            }
-        }
-    }
-    for (int i = 0; i < 11; i += 2)
-    {
-        for (int j = 1; j < 11; j += 2)
-        {
-            if (map[i][j] != OCCLINE)
-            {
-                f(LOC{i, j});
-            }
-        }
-    }
-}
-
-/**
  * @brief 判断是否赢得格子
  *
  * @param l 需要判断的边的坐标
@@ -467,29 +399,28 @@ bool Board::getCTypeBoxLimit(int Player, vector<LOC> &pace)
         {
             if (getCTypeBoxBool(x, y))
             {
-                int lx, ly;
                 if ((map[x + 1][y] == HENG || map[x + 1][y] == SHU) && !getCTypeBoxBool(x + 2, y))
                 {
                     move(Player, {x + 1, y});
-                    pace.push_back({x + 1, y}); //**记录步伐
+                    pace.emplace_back(x + 1, y); //**记录步伐
                     return true;                // 占据之后就返回真
                 }
                 else if ((map[x - 1][y] == HENG || map[x - 1][y] == SHU) && !getCTypeBoxBool(x - 2, y))
                 {
                     move(Player, {x - 1, y});
-                    pace.push_back({x - 1, y}); //**记录步伐
+                    pace.emplace_back(x - 1, y); //**记录步伐
                     return true;                // 占据之后就返回真
                 }
                 else if ((map[x][y + 1] == HENG || map[x][y + 1] == SHU) && !getCTypeBoxBool(x, y + 2))
                 {
                     move(Player, {x, y + 1});
-                    pace.push_back({x, y + 1}); //**记录步伐
+                    pace.emplace_back(x, y + 1); //**记录步伐
                     return true;                // 占据之后就返回真
                 }
                 else if ((map[x][y - 1] == SHU || map[x][y - 1] == SHU) && !getCTypeBoxBool(x, y - 2))
                 {
                     move(Player, {x, y - 1});
-                    pace.push_back({x, y - 1}); //*记录步伐
+                    pace.emplace_back(x, y - 1); //*记录步伐
                     return true;                // 占据之后就返回真
                 }
             }
@@ -627,7 +558,7 @@ void Board::eatAllCTypeBoxes(int Player, vector<LOC> &pace)
         if (tmp == flag)
             break;
         else
-            pace.push_back(tmp); //**记录步伐
+            pace.emplace_back(tmp); //**记录步伐
     }
 }
 void Board::eatAllCTypeBoxes(int Player)
@@ -649,13 +580,12 @@ bool Board::getLongCTypeBoxExist()
         {
             if (getFreedom(bx, by) == DEADBOX) // 如果存在自由度为1的格子
             {
-                int Dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
-                for (int n = 0; n < 4; n++)
+                for (auto n : Dir)
                 {
-                    int ex = bx + Dir[n][0];
-                    int ey = by + Dir[n][1];
-                    int nbx = bx + Dir[n][0] + Dir[n][0];
-                    int nby = by + Dir[n][1] + Dir[n][1];
+                    int ex = bx + n[0];
+                    int ey = by + n[1];
+                    int nbx = bx + n[0] + n[0];
+                    int nby = by + n[1] + n[1];
                     if ((map[ex][ey] == HENG || map[ex][ey] == SHU) && nbx >= 1 && nbx <= LEN - 2 && nby >= 1 &&
                         nby <= LEN - 2)
                     {
@@ -728,11 +658,11 @@ bool Board::getFreeBoxBool(int bx, int by)
         else
             return false;
     }
-    else
-    {
-        // cout << "Wrong Number In <GetFreeBoxBool> Function";
-        system("pause");
-    }
+    // else
+    // {
+    //     // cout << "Wrong Number In <GetFreeBoxBool> Function";
+    //     // system("pause");
+    // }
     return false;
 }
 void Board::unmove(LOC l)
@@ -927,7 +857,7 @@ int Board::getPlayerBoxes(int player)
             }
         }
     }
-    if (player == WHITE)
+    else if (player == WHITE)
     {
         for (int i = 0; i < LEN; i++)
         {
@@ -960,13 +890,12 @@ bool Board::getLongCTypeBoxBool(int bx, int by) // 判断一个格子是否是�
 {
     if (getFreedom(bx, by) == DEADBOX) // 首先这个格子必须本身是一个C型格
     {
-        int Dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
-        for (int n = 0; n < 4; n++)
+        for (auto n : Dir)
         {
-            int ex = bx + Dir[n][0];
-            int ey = by + Dir[n][1];
-            int nbx = bx + Dir[n][0] + Dir[n][0]; // 下一个格子的实际地址
-            int nby = by + Dir[n][1] + Dir[n][1]; // 下一个格子的实际地址
+            int ex = bx + n[0];
+            int ey = by + n[1];
+            int nbx = bx + n[0] + n[0]; // 下一个格子的实际地址
+            int nby = by + n[1] + n[1]; // 下一个格子的实际地址
             if ((map[ex][ey] == HENG || map[ex][ey] == SHU) && nbx >= 1 && nbx <= LEN - 2 && nby >= 1 && nby <= LEN - 2)
             {
                 if (getFreedom(nbx, nby) == CHAINBOX)
@@ -986,21 +915,20 @@ LOC Board::getDoubleCrossLoc(int Player)
             if (getLongCTypeBoxBool(bx, by))
             {
                 // 现在的bx和by就是实际的格子
-                int Dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
-                for (int n = 0; n < 4; n++)
+                for (auto n : Dir)
                 {
-                    int ex = bx + Dir[n][0];
-                    int ey = by + Dir[n][1];
-                    int nbx = bx + Dir[n][0] + Dir[n][0];
-                    int nby = by + Dir[n][1] + Dir[n][1];
+                    int ex = bx + n[0];
+                    int ey = by + n[1];
+                    int nbx = bx + n[0] + n[0];
+                    int nby = by + n[1] + n[1];
                     if ((map[ex][ey] == SHU | map[ex][ey] == HENG) && nbx >= 1 && nbx <= LEN - 2 && nby >= 1 &&
                         nby <= LEN - 2)
                     {
                         // 现在ex,ey是其公共边，nbx,nby是doublecross的末端CHAINBOX
-                        for (int n = 0; n < 4; n++)
+                        for (auto dir : Dir)
                         {
-                            int nex = nbx + Dir[n][0];
-                            int ney = nby + Dir[n][1];
+                            int nex = nbx + dir[0];
+                            int ney = nby + dir[1];
                             if ((map[nex][ney] == HENG || map[nex][ney] == SHU) &&
                                 (nex != ex || ney != ey)) // 空边而且不是中间的公共边(ex,ey)
                             {

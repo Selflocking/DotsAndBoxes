@@ -71,8 +71,7 @@ void BoxBoard::resetChainsInfo() // 重置链与格的信息，不使用0号空�
 
 int BoxBoard::getFilterMoves(LOC Moves[60])
 {
-    bool st[LEN][LEN] = {0};
-
+    bool st[LEN][LEN] = {false};
     int MoveNum = 0;
     for (int y = 0; y < LEN; y++)
     {
@@ -188,13 +187,12 @@ int BoxBoard::getFilterMoves(LOC Moves[60])
 void BoxBoard::searchingFromBox(LOC BoxLoc) // 从一个格出发，注册他的所有派生链，ChainPlus应在没有短链时启用
 {
     // cout<<"进入searchingFromBox函数"<<endl;
-    int Dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
-    for (int n = 0; n < 4; n++)
+    for (auto n : Dir)
     {
-        int bx = BoxLoc.first + Dir[n][0];
-        int by = BoxLoc.second + Dir[n][1]; //#邻格#
-        int lx = (BoxLoc.first * 2) - 1 + Dir[n][0];
-        int ly = (BoxLoc.second * 2) - 1 + Dir[n][1];                                      //#邻边#
+        int bx = BoxLoc.first + n[0];
+        int by = BoxLoc.second + n[1]; //#邻格#
+        int lx = (BoxLoc.first * 2) - 1 + n[0];
+        int ly = (BoxLoc.second * 2) - 1 + n[1];                                           //#邻边#
         if ((map[lx][ly] == HENG || map[lx][ly] == SHU) && getBoxType(bx, by) == CHAINBOX) // 邻边为空，目标格子为链格
         {
             if (Boxes[bx][by].BelongingChainNum == EMPTY) // 必须为未归属的格子，避免环重复从不同方向出发。
@@ -224,8 +222,6 @@ void BoxBoard::registerChain(LOC FreeBoxLoc, LOC FirstLoc)
 {
     // 动态注册链。从一个格子出发 ，向一个格子开始进行链的注册。一般仅从自由格出发
 
-    int x = FreeBoxLoc.first;         // 初始X值
-    int y = FreeBoxLoc.second;        // 初始Y值
     LOC Loc = FreeBoxLoc;             // 设置起点坐标
     LOC NewLoc = FirstLoc;            // 设置新坐标#目标格子#
     int Re = getFirstEmptyChainNum(); // 获取一个空白的链空间
@@ -413,16 +409,15 @@ void BoxBoard::defineAllChains(bool ChainPlus) // 定义所有的链
             {
                 if (Boxes[x][y].Type == 3 && Chains[Boxes[x][y].BelongingChainNum].Type == PreCircle)
                 {
-                    int Dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
                     int bx = x * 2 - 1;
                     int by = y * 2 - 1;
                     // 先手先产生一个死格
-                    for (int n = 0; n < 4; n++)
+                    for (auto n : Dir)
                     {
-                        int ex = bx + Dir[n][0];
-                        int ey = by + Dir[n][1]; //#邻边#
-                        int nbx = x + Dir[n][0];
-                        int nby = y + Dir[n][1]; //#邻格#
+                        int ex = bx + n[0];
+                        int ey = by + n[1]; //#邻边#
+                        int nbx = x + n[0];
+                        int nby = y + n[1]; //#邻格#
                         if (map[ex][ey] != OCCLINE && Chains[Boxes[nbx][nby].BelongingChainNum].Type == LongChain)
                         {
                             Chains[Boxes[nbx][nby].BelongingChainNum].ConditionOfPreCircle = true;
@@ -437,17 +432,16 @@ void BoxBoard::defineAllChains(bool ChainPlus) // 定义所有的链
         {
             for (int x = 1; x <= BOXLEN; x++)
             {
-                int Dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
                 if (Boxes[x][y].Type == FREEBOX && Boxes[x][y].BelongingChainNum == EMPTY) // 若本自由格还未确定
                 {
                     int ChainRegNum[4];
                     int Total = 0;
-                    for (int n = 0; n < 4; n++)
+                    for (auto n : Dir)
                     {
-                        int bx = x + Dir[n][0];
-                        int by = y + Dir[n][1];
-                        int lx = (x * 2) - 1 + Dir[n][0];
-                        int ly = (y * 2) - 1 + Dir[n][1];
+                        int bx = x + n[0];
+                        int by = y + n[1];
+                        int lx = (x * 2) - 1 + n[0];
+                        int ly = (y * 2) - 1 + n[1];
                         if (map[lx][ly] != OCCLINE && getBoxType(bx, by) == CHAINBOX) // 邻边为空，目标格子为链格
                         {
                             ChainRegNum[Total] = Boxes[bx][by].BelongingChainNum;
@@ -488,13 +482,12 @@ void BoxBoard::defineAllChains(bool ChainPlus) // 定义所有的链
 
 void BoxBoard::searchingCircle(LOC BoxLoc)
 {
-    int Dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
-    for (int n = 0; n < 4; n++)
+    for (auto n : Dir)
     {
-        int bx = BoxLoc.first + Dir[n][0];
-        int by = BoxLoc.second + Dir[n][1];
-        int lx = (BoxLoc.first * 2) - 1 + Dir[n][0];
-        int ly = (BoxLoc.second * 2) - 1 + Dir[n][1];
+        int bx = BoxLoc.first + n[0];
+        int by = BoxLoc.second + n[1];
+        int lx = (BoxLoc.first * 2) - 1 + n[0];
+        int ly = (BoxLoc.second * 2) - 1 + n[1];
         if (map[lx][ly] != OCCLINE && getBoxType(bx, by) == CHAINBOX) // 邻边为空，目标格子为链格
         {
             if (Boxes[bx][by].BelongingChainNum == EMPTY) // 必须为未归属的格子，避免环重复从不同方向出发。
@@ -510,8 +503,6 @@ void BoxBoard::searchingCircle(LOC BoxLoc)
 void BoxBoard::registerCircle(LOC StartLoc, LOC NextLoc) // 动态注册链.一般仅从自由格出发
 {
     // cout << "进入registerCircle函数" << endl;
-    int x = StartLoc.first;           // 初始X值
-    int y = StartLoc.second;          // 初始Y值
     LOC Loc = StartLoc;               // 设置起点坐标
     LOC NewLoc = NextLoc;             // 设置新坐标
     int Re = getFirstEmptyChainNum(); // 获取一个空白的链空间
@@ -590,13 +581,12 @@ void BoxBoard::defineDeadChain()
 void BoxBoard::searchingDeadChain(LOC BoxLoc)
 {
     // cout << "进入searchingDeadChain" << endl;
-    int Dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
-    for (int n = 0; n < 4; n++)
+    for (auto n : Dir)
     {
-        int bx = BoxLoc.first + Dir[n][0];
-        int by = BoxLoc.second + Dir[n][1];
-        int lx = (BoxLoc.first * 2) - 1 + Dir[n][0];
-        int ly = (BoxLoc.second * 2) - 1 + Dir[n][1];
+        int bx = BoxLoc.first + n[0];
+        int by = BoxLoc.second + n[1];
+        int lx = (BoxLoc.first * 2) - 1 + n[0];
+        int ly = (BoxLoc.second * 2) - 1 + n[1];
         if ((map[lx][ly] == HENG || map[lx][ly] == SHU) && getBoxType(bx, by) == CHAINBOX) // 邻边为空，目标格子为链格
         {
             if (Boxes[bx][by].BelongingChainNum == EMPTY) // 必须为未归属的格子，避免环重复从不同方向出发。
@@ -615,8 +605,6 @@ void BoxBoard::registerDeadChain(LOC FreeBoxLoc, LOC FirstLoc)
     // 动态注册链。从一个格子出发 ，向一个格子开始进行链的注册。
     //  cout << "进入registerDeadChain" << endl;
 
-    int x = FreeBoxLoc.first;         // 初始X值
-    int y = FreeBoxLoc.second;        // 初始Y值
     LOC Loc = FreeBoxLoc;             // 设置起点坐标
     LOC NewLoc = FirstLoc;            // 设置新坐标
     int Re = getFirstEmptyChainNum(); // 获取一个空白的链空间
@@ -687,17 +675,15 @@ bool BoxBoard::captualShortestChain(int LatterPlayer)
         {
             if (Boxes[x][y].BelongingChainNum == Least && !Finish)
             {
-
-                int Dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
                 int bx = x * 2 - 1;
                 int by = y * 2 - 1;
 
-                for (int n = 0; n < 4; n++)
+                for (auto n : Dir)
                 {
-                    int ex = bx + Dir[n][0];
-                    int ey = by + Dir[n][1];
-                    int nbx = x + Dir[n][0];
-                    int nby = y + Dir[n][1];
+                    int ex = bx + n[0];
+                    int ey = by + n[1];
+                    int nbx = x + n[0];
+                    int nby = y + n[1];
                     if ((map[ex][ey] == HENG || map[ex][ey] == SHU) &&
                         Boxes[nbx][nby].BelongingChainNum == Least) // 找到两个格子交叉的那个格子
                     {
@@ -717,13 +703,12 @@ bool BoxBoard::captualShortestChain(int LatterPlayer)
         {
             if (Boxes[x][y].BelongingChainNum == Least)
             {
-                int Dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
                 int bx = x * 2 - 1;
                 int by = y * 2 - 1;
-                for (int n = 0; n < 4; n++)
+                for (auto n : Dir)
                 {
-                    int ex = bx + Dir[n][0];
-                    int ey = by + Dir[n][1];
+                    int ex = bx + n[0];
+                    int ey = by + n[1];
                     if (map[ex][ey] == HENG || map[ex][ey] == SHU)
                     {
                         move(LatterPlayer, {ex, ey});
@@ -767,17 +752,15 @@ LOC BoxBoard::getOpenShortestChainLoc()
         {
             if (Boxes[x][y].BelongingChainNum == Least)
             {
-
-                int Dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
                 int bx = x * 2 - 1;
                 int by = y * 2 - 1;
 
-                for (int n = 0; n < 4; n++)
+                for (auto n : Dir)
                 {
-                    int ex = bx + Dir[n][0];
-                    int ey = by + Dir[n][1];
-                    int nbx = x + Dir[n][0];
-                    int nby = y + Dir[n][1];
+                    int ex = bx + n[0];
+                    int ey = by + n[1];
+                    int nbx = x + n[0];
+                    int nby = y + n[1];
                     if ((map[ex][ey] == HENG || map[ex][ey] == SHU) &&
                         Boxes[nbx][nby].BelongingChainNum == Least) // 找到两个格子交叉的那个格子
                     {
@@ -856,17 +839,15 @@ LOC BoxBoard::getOpenShortestCircleLoc() // 获得待打开的最短的环的坐
         {
             if (Boxes[x][y].BelongingChainNum == Least)
             {
-
-                int Dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
                 int bx = x * 2 - 1;
                 int by = y * 2 - 1;
 
-                for (int n = 0; n < 4; n++)
+                for (auto n : Dir)
                 {
-                    int ex = bx + Dir[n][0];
-                    int ey = by + Dir[n][1];
-                    int nbx = x + Dir[n][0];
-                    int nby = y + Dir[n][1];
+                    int ex = bx + n[0];
+                    int ey = by + n[1];
+                    int nbx = x + n[0];
+                    int nby = y + n[1];
                     if ((map[ex][ey] == HENG || map[ex][ey] == SHU) &&
                         Boxes[nbx][nby].BelongingChainNum == Least) // 找到两个格子共用的那条边
                     {
@@ -903,17 +884,15 @@ LOC BoxBoard::getOpen3ChainLoc() // 获得打开3链的坐标
         {
             if (Boxes[x][y].BelongingChainNum == SuitChainidx)
             {
-
-                int Dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
                 int bx = x * 2 - 1;
                 int by = y * 2 - 1;
 
-                for (int n = 0; n < 4; n++)
+                for (auto n : Dir)
                 {
-                    int ex = bx + Dir[n][0];
-                    int ey = by + Dir[n][1];
-                    int nbx = x + Dir[n][0];
-                    int nby = y + Dir[n][1];
+                    int ex = bx + n[0];
+                    int ey = by + n[1];
+                    int nbx = x + n[0];
+                    int nby = y + n[1];
                     if ((map[ex][ey] == HENG || map[ex][ey] == SHU) &&
                         Boxes[nbx][nby].BelongingChainNum == SuitChainidx) // 找到两个格子交叉的那条边
                     {
@@ -946,7 +925,6 @@ LOC BoxBoard::getEarlyRationalBoxNum() // 用于UCT预处理，获得余下局�
     int LCBox = 0;
     int CNum = 0; // 环数目
     int CBox = 0;
-    int PCNum = 0; // 预备环的数目
     int PCBox = 0;
 
     for (int i = 1; i <= 25; i++)
@@ -1164,14 +1142,8 @@ void BoxBoard::defineBoxesType() // 定义格子类型
     {
         for (int x = 1; x <= BOXLEN; x++) // 格子数
         {
-            int bx = (x * 2) - 1;          // Board中的坐标#表格子属主坐标#
-            int by = (y * 2) - 1;          // Board中的坐标
-            Boxes[x][y].BoxLoc = {bx, by}; // 存入坐标
-            // 定义Owner
-            if (map[bx][by] == BOX)       // 如果还没被占领
-                Boxes[x][y].BoxOwner = 0; // 未被占领
-            else
-                Boxes[x][y].BoxOwner = map[bx][by]; // 除以二之后的数值等同于玩家编号
+            int bx = (x * 2) - 1; // Board中的坐标#表格子属主坐标#
+            int by = (y * 2) - 1; // Board中的坐标
             // 定义Type
             int bl = getFreedom(bx, by); // 得到格子的自由度
             if (bl == 4)
@@ -1290,7 +1262,7 @@ bool BoxBoard::getSaveAngleEdgeBool(int x, int y, bool st[LEN][LEN]) // 对边�
 
 int BoxBoard::getFreeMoves(LOC Moves[60])
 {
-    bool st[LEN][LEN] = {0};
+    bool st[LEN][LEN] = {false};
     int MoveNum = 0;
     // 得到所有的自由边
     // 先判断所有竖边

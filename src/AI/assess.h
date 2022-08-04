@@ -8,8 +8,6 @@ class BoxType
 {
   public:
     BoxType();
-    LOC BoxLoc;
-    int BoxOwner;          //格子的属主
     int Type;              //[0]已被占领 [1]死格 [2]链格 [3]自由格
     int BelongingChainNum; //所属链类型的编号，会从1开始自动编号。
 };
@@ -64,7 +62,7 @@ class BoxBoard : public Board
     LOC getOpen3ChainLoc();                      //*获得打开3链的坐标
 
     //最终判定局面
-    bool rationalState(LOC BoxNum);
+    static bool rationalState(LOC BoxNum);
     //*判断双方是否为理性状态。理性状态：当前局面中，预测控制者一直保持控制得到的格子数，大于让给对方的格子数
     LOC getEarlyRationalBoxNum(); //*用在UCT前的预处理中
     LOC getRationalStateBoxNum(); //*用在后期决策中

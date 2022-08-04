@@ -3,8 +3,6 @@
 #ifndef DOTS_AND_BOXES_NODE_H
 #define DOTS_AND_BOXES_NODE_H
 
-constexpr int INF = 1e9; /**< 无穷大 */
-
 class Node : public Board
 {
   public:

@@ -37,9 +37,6 @@ class Board
     bool ifEnd() const;                  /**<判断游戏是否结束*/
 
     LOC getPublicSide(LOC a, LOC b); //获得两个格子的公共边，传入的坐标为(5*5)
-    void print();                    /**<打印当前棋盘*/
-    void traverseEdge(std::function<void(int i, int j)> const &f) const; /**<遍历所有的空边*/
-    void traverseEdge(std::function<void(LOC l)> const &f) const;        /**<遍历所有的空边*/
 
     //计算
     LOC getDoubleCrossLoc(int Player); //*查找一个doublecross的制作方法，返回值为该边的坐标

@@ -4,14 +4,9 @@
 #include "board.h"
 #include "define.h"
 #include <ctime>
-#include <mutex>
+#include <iostream>
 #include <random>
-#include <thread>
 
-using std::mutex;
-using std::ref;
-using std::thread;
-std::mutex mtx;
 std::mt19937_64 rng(std::random_device{}());
 
 int getBoardWinner(Board &CB, int LatterPlayer)
@@ -58,16 +53,6 @@ int getFilterMCWinner(Board &CB, int NextPlayer, int &score)
     }
     int W = getBoardWinner(CB, -player, score);
     return W;
-}
-
-void multi_thread_func(Board &CB, int &a, int NextPlayer, int Winner)
-{
-    if (getFilterMCWinner(CB, NextPlayer) == Winner) //#传入的是后续玩家#
-    {
-        mtx.lock();
-        a++;
-        mtx.unlock();
-    }
 }
 
 float getFilterMCEvalution(Board &CB, int NextPlayer, int Winner)
@@ -136,12 +121,11 @@ float UCTProcess(Node &B, int &Total) //#Total 尝试次数#
         B.refreshAvgValue();
         return B.AvgValue;
     }
-    return 0;
 }
 
 void UCTMove(Board &CB, int Player, bool Msg, vector<LOC> &pace)
 {
-    Node UCTB = Node(Player, CB.map, true); //根据当前局面创建UCT的根节点
+    Node UCTB(Player, CB.map, true); //根据当前局面创建UCT的根节点
     if (UCTB.BoardWinner == 0)
     {
         int Total = 0;           // UCT的次数函数
@@ -157,8 +141,8 @@ void UCTMove(Board &CB, int Player, bool Msg, vector<LOC> &pace)
         //判定最佳收益
         int BestNodeNum = 0;
         float BestAvgValue = 0;
-        int LargerTimesNodeNum = 0;
-        int LargerTimesValue = 0;
+//        int LargerTimesNodeNum = 0;
+//        int LargerTimesValue = 0;
         for (int i = 0; i < UCTB.ExistChild; i++)
         {
             if (UCTB.ChildNodes[i]->AvgValue >= BestAvgValue)
@@ -166,16 +150,16 @@ void UCTMove(Board &CB, int Player, bool Msg, vector<LOC> &pace)
                 BestNodeNum = i;
                 BestAvgValue = UCTB.ChildNodes[i]->AvgValue;
             }
-            if (UCTB.ChildNodes[i]->Times >= LargerTimesValue)
-            {
-                LargerTimesNodeNum = i;
-                LargerTimesValue = UCTB.ChildNodes[i]->Times;
-            }
+//            if (UCTB.ChildNodes[i]->Times >= LargerTimesValue)
+//            {
+//                LargerTimesNodeNum = i;
+//                LargerTimesValue = UCTB.ChildNodes[i]->Times;
+//            }
         }
 
         CB.move(Player, {UCTB.NodeMoves[BestNodeNum].first, UCTB.NodeMoves[BestNodeNum].second});
-        pace.push_back({UCTB.NodeMoves[BestNodeNum].first, UCTB.NodeMoves[BestNodeNum].second}); //**记录步伐
-
+        pace.emplace_back(UCTB.NodeMoves[BestNodeNum].first, UCTB.NodeMoves[BestNodeNum].second); //**记录步伐
+        // std::cout<<Total<<std::endl;
         // if (Msg)
         // {
         //     cout << UCTB.NodeMoves[BestNodeNum].first << "," << UCTB.NodeMoves[BestNodeNum].second << " " << Player
@@ -261,7 +245,7 @@ void UCTMoveWithSacrifice(Board &CB, int Player, bool Msg, vector<LOC> &pace)
                     if (Dead.getDeadChainExist())
                     {
                         LOC t = CB.eatCBox(Player);
-                        pace.push_back(t); //*记录步伐
+                        pace.emplace_back(t); //*记录步伐
                     }
                     else
                         break;
@@ -280,7 +264,7 @@ void UCTMoveWithSacrifice(Board &CB, int Player, bool Msg, vector<LOC> &pace)
                     if (Dead.getDeadCircleExist())
                     {
                         LOC t = CB.eatCBox(Player);
-                        pace.push_back(t); //**记录步伐
+                        pace.emplace_back(t); //**记录步伐
                     }
                     else
                         break;
@@ -290,7 +274,7 @@ void UCTMoveWithSacrifice(Board &CB, int Player, bool Msg, vector<LOC> &pace)
             }
 
             CB.move(Player, {DCMove.first, DCMove.second});
-            pace.push_back(DCMove); //**记录步伐
+            pace.emplace_back(DCMove); //**记录步伐
             for (;;)                //吃掉所有死格
             {
                 if (!CB.getCTypeBoxLimit(Player, pace)) //**记录步伐
@@ -349,7 +333,7 @@ void latterSituationMove(Board &CB, int Player, vector<LOC> &pace)
                     if (Dead.getDeadChainExist())
                     {
                         LOC tmp = CB.eatCBox(Player);
-                        pace.push_back(tmp); //**记录步伐
+                        pace.emplace_back(tmp); //**记录步伐
                     }
                     else
                         break;
@@ -368,7 +352,7 @@ void latterSituationMove(Board &CB, int Player, vector<LOC> &pace)
                     if (Dead.getDeadCircleExist())
                     {
                         LOC t = CB.eatCBox(Player);
-                        pace.push_back(t); //**记录步伐
+                        pace.emplace_back(t); //**记录步伐
                     }
                     else
                         break;
@@ -378,7 +362,7 @@ void latterSituationMove(Board &CB, int Player, vector<LOC> &pace)
             }
 
             CB.move(Player, DCMove);
-            pace.push_back(DCMove); //**记录步伐
+            pace.emplace_back(DCMove); //**记录步伐
             for (;;)                //直到无法占据CTypeBox了就结束
             {
                 if (!CB.getCTypeBoxLimit(Player, pace)) //**记录步伐
@@ -393,10 +377,9 @@ void latterSituationMove(Board &CB, int Player, vector<LOC> &pace)
         CB.eatAllCTypeBoxes(Player, pace); //**记录步伐
         BoxBoard Test(CB);
 
-        LOC p;
-        p = Test.openPolicy(); //调用打开决策函数获得打开步伐坐标
+        LOC p = Test.openPolicy(); //调用打开决策函数获得打开步伐坐标
         CB.move(Player, p);
-        pace.push_back(p); //**记录步伐
+        pace.emplace_back(p); //**记录步伐
     }
 }
 
