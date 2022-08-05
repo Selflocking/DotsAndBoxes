@@ -5,11 +5,12 @@
 #include "AI/define.h"
 #include "element/Time.h"
 #include <SFML/Graphics.hpp>
+#include <fstream>
 #include <future>
 #include <thread>
 
-const char *BlackName = "人工智障A";
-const char *WhiteName = "人工智障B";
+std::string BlackName = "先手";
+std::string WhiteName = "后手";
 
 sf::RenderWindow mainWindow;
 sf::Font font;
@@ -75,7 +76,14 @@ int main()
     font.loadFromFile("res/LXGWWenKai-Bold.ttf");
     texture.loadFromFile("res/board.jpg", sf::IntRect(0, 0, 1000, 1000));
     sprite.setTexture(texture);
-
+    std::ifstream config("config.ini");
+    if (config.is_open())
+    {
+        BlackName.clear();
+        WhiteName.clear();
+        config >> BlackName >> WhiteName;
+        config.close();
+    }
     initSidebar();
     while (mainWindow.isOpen())
     {
@@ -485,7 +493,8 @@ void handleButtons(int x, int y)
     }
     else if (contains(print_button, x, y))
     {
-        data_of_game ginfo = data_of_game(gameBoard->blackBox, gameBoard->whiteBox, BlackName, WhiteName);
+        data_of_game ginfo =
+            data_of_game(gameBoard->blackBox, gameBoard->whiteBox, BlackName.c_str(), WhiteName.c_str());
         ginfo.recordstep(steps);
         ginfo.endrecord();
         ginfo.printdata();
