@@ -8,13 +8,13 @@
 #define DOTS_AND_BOXES_UCT_H
 
 int getBoardWinner(Board &CB, int LatterPlayer);             //*得到或者预测当前局面胜利者
-int getBoardWinner(Board &CB, int LatterPlayer, int &score); //*得到或者预测当前局面胜利者
+int getBoardWinner(Board &CB, int LatterPlayer,int FaOwner,int &score); //*得到或者预测当前局面胜利者
 
 // FilterMC，
 float getFilterMCEvalution(Board &CB, int NextPlayer, int Winner);
 //*在扩展子节点时，为子节点初次评估一个收益
 int getFilterMCWinner(Board &CB, int NextPlayer);             //*返回模拟的胜负结果
-int getFilterMCWinner(Board &CB, int NextPlayer, int &score); //*返回模拟的胜负结果
+int getFilterMCWinner(Board &CB, int NextPlayer,int &score); //*返回模拟的胜负结果
 int rndFilterTurn(Board &CB, int Player, bool Msg);           //*用于模拟时随机占边
 
 float UCTProcess(Node &B, int &Total);                            //*uct搜索

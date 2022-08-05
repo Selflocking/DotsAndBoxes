@@ -1034,7 +1034,7 @@ int BoxBoard::getBoardWinner(int LatterPlayer)
         return getWinner();
 }
 
-int BoxBoard::getBoardWinner(int LatterPlayer, int &score)
+int BoxBoard::getBoardWinner(int LatterPlayer,int FaOwner, int &score)
 {
     // if (getFilterMoveNum() > 0)
     //     cout << "Wrong";
@@ -1056,20 +1056,22 @@ int BoxBoard::getBoardWinner(int LatterPlayer, int &score)
                 player = -player;
         }
     }
-    if (getWinner() == 0) // 也就是还没胜利
+    if (getWinner() == 0) // 也就是还没下完
     {
         int r, b;
         if (player == BLACK)
         {
             r = BoxNum.first + getPlayerBoxes(BLACK); // 玩家是红方，则加上除去牺牲剩余的格子数
             b = BoxNum.second + getPlayerBoxes(WHITE);
-            score = r; // score为该节点的父结点拥有者即player获得的格子数
+            if(FaOwner==BLACK) score=r;// score为该节点的父结点拥有者即player获得的格子数
+            else score=b;
         }
         else
         {
             r = BoxNum.second + getPlayerBoxes(BLACK);
             b = BoxNum.first + getPlayerBoxes(WHITE); // 玩家是蓝方，则加上牺牲剩余的格子数
-            score = b; // score为该节点的父结点拥有者即player获得的格子数
+            if(FaOwner==BLACK) score=r;// score为该节点的父结点拥有者即player获得的格子数
+            else score=b;
         }
         if (r > b)
             return BLACK;
@@ -1078,7 +1080,8 @@ int BoxBoard::getBoardWinner(int LatterPlayer, int &score)
     }
     else
     {
-        score = getPlayerBoxes(player); // score为该节点的父结点拥有者即player获得的格子数
+        if(FaOwner==BLACK) score=blackBox;// score为该节点的父结点拥有者即player获得的格子数
+        else score=whiteBox;
         return getWinner();
     }
 }

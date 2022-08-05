@@ -68,7 +68,7 @@ class BoxBoard : public Board
     //*获得当前局面下双方以理性状态可以获得的格子数量
     //*x为控制者在余下局面一直保持控制权得到的格子数,y为打开者获得的格子数（在余下局面中控制者让给打开者的格子数）
     int getBoardWinner(int LatterPlayer);             //*得到或预测本局面下的胜利者，参数为后手方。
-    int getBoardWinner(int LatterPlayer, int &score); //*得到或预测本局面下的胜利者，参数为后手方。
+    int getBoardWinner(int LatterPlayer, int FaOwner,int &score); //*得到或预测本局面下的胜利者，参数为后手方。
 
     //等价裁边
     int getFilterMoves(LOC Moves[60]);                          //*得到所有的过滤可行边(不产生死链)
