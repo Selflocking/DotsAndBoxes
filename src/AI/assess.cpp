@@ -995,12 +995,12 @@ int BoxBoard::getBoardWinner(int LatterPlayer)
     // if (getFilterMoveNum() > 0)
     //     cout << "Wrong";
     int player = LatterPlayer;
-    defineBoxesType();
+    // defineBoxesType();
 
     LOC BoxNum;
     for (;;) // 非理性情况下吞并所有
     {
-        defineAllChains(true);             // 先定义为完全状态判定一次
+        // defineAllChains(true);             // 先定义为完全状态判定一次
         BoxNum = getRationalStateBoxNum(); // 然后再判定一次理性情况
         if (rationalState(BoxNum))
             break;

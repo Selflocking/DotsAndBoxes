@@ -25,7 +25,7 @@ Node::Node(Node &other) : Board(other)
     }
 }
 
-Node::Node(int Player, int Array[LEN][LEN], bool GetCBox):Board(Array)
+Node::Node(int Player, int Array[LEN][LEN], bool GetCBox) : Board(Array)
 {
 
     if (GetCBox)
@@ -57,9 +57,9 @@ float Node::refreshAvgValue()
     // 首先计算平均收益
     for (int i = 0; i < ExistChild; i++)
     {
-        Value += ChildNodes[i]->AvgValue;
+        Value += ChildNodes[i]->AvgValue * ChildNodes[i]->Times / Times;
     }
-    AvgValue = 1 - (Value / ExistChild); // 当前节点的平均收益必定是(1 - 子节点的平均收益 )
+    AvgValue = 1 - Value; // 当前节点的平均收益必定是(1 - 子节点的平均收益 )
     return AvgValue;
 }
 

@@ -13,12 +13,12 @@ int getBoardWinner(Board &CB, int LatterPlayer)
 {
     BoxBoard Advanced(CB);
     if (Advanced.getFilterMoveNum() != 0)
-        return 0;
-    int w = Advanced.getBoardWinner(LatterPlayer);
-    return w;
+        return EMPTY;
+    else
+        return Advanced.getBoardWinner(LatterPlayer);
 }
 
-int getBoardWinner(Board &CB, int LatterPlayer, int FaOwner,int &score)
+int getBoardWinner(Board &CB, int LatterPlayer, int FaOwner, int &score)
 {
     BoxBoard Advanced(CB);
     if (Advanced.getFilterMoveNum() != 0) //未到终局
@@ -27,7 +27,7 @@ int getBoardWinner(Board &CB, int LatterPlayer, int FaOwner,int &score)
         return 0;
     }
     //到终局
-    int w = Advanced.getBoardWinner(LatterPlayer,FaOwner, score); // score为该节点的父结点拥有者即FaOwner得到格子数
+    int w = Advanced.getBoardWinner(LatterPlayer, FaOwner, score); // score为该节点的父结点拥有者即FaOwner得到格子数
     return w;
 }
 
@@ -42,14 +42,14 @@ int getFilterMCWinner(Board &CB, int NextPlayer)
     return W;
 }
 
-int getFilterMCWinner(Board &CB, int NextPlayer,int &score)//第二个参数为当前节点拥有者
+int getFilterMCWinner(Board &CB, int NextPlayer, int &score) //第二个参数为当前节点拥有者
 {
     int player = NextPlayer;
     while (CB.getFreeEdgeNum() != 0) //当还存在自由边的时候
     {
         player = rndFilterTurn(CB, player, false); //#传入后续玩家#
     }
-    int W = getBoardWinner(CB, -player, -NextPlayer,score);//第三个参数为当前节点的父结点拥有者
+    int W = getBoardWinner(CB, -player, -NextPlayer, score); //第三个参数为当前节点的父结点拥有者
     return W;
 }
 
