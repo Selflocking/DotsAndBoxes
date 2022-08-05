@@ -8,8 +8,8 @@
 #include <future>
 #include <thread>
 
-const char * BlackName = "人工智障A";
-const char * WhiteName = "人工智障B";
+const char *BlackName = "人工智障A";
+const char *WhiteName = "人工智障B";
 
 sf::RenderWindow mainWindow;
 sf::Font font;
@@ -434,6 +434,14 @@ void handleButtons(int x, int y)
     }
     else if (contains(redo_button, x, y))
     {
+        if (nowPlayer == BLACK)
+        {
+            black_time.stop();
+        }
+        else
+        {
+            white_time.stop();
+        }
         if (top != 60 && steps[top + 1].player != EMPTY)
         {
             int temp = steps[top + 1].player;
@@ -441,12 +449,29 @@ void handleButtons(int x, int y)
             {
                 top++;
                 gameBoard->move(steps[top].player, steps[top].action);
+                nowMove = steps[top].action;
             }
             nowPlayer = -temp;
+        }
+        if (nowPlayer == BLACK)
+        {
+            black_time.start();
+        }
+        else
+        {
+            white_time.start();
         }
     }
     else if (contains(undo_button, x, y))
     {
+        if (nowPlayer == BLACK)
+        {
+            black_time.stop();
+        }
+        else
+        {
+            white_time.stop();
+        }
         if (top != -1)
         {
             int temp = steps[top].player;
@@ -455,7 +480,16 @@ void handleButtons(int x, int y)
                 gameBoard->unmove(steps[top].action);
                 top--;
             }
+            nowMove = steps[top].action;
             nowPlayer = temp;
+        }
+        if (nowPlayer == BLACK)
+        {
+            black_time.start();
+        }
+        else
+        {
+            white_time.start();
         }
     }
     else if (contains(print_button, x, y))
