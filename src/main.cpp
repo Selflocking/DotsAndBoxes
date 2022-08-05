@@ -25,7 +25,7 @@ Time white_time;
 
 bool black_ai = false;
 bool white_ai = false;
-bool game_begin = false;
+int game_begin = 0;
 
 Step steps[60];
 int top = -1;
@@ -99,7 +99,7 @@ int main()
             }
         }
         // cout<<"steps:"<<steps.size()<<endl;
-        if (game_begin)
+        if (game_begin == 1)
             AIMove();
         mainWindow.clear(sf::Color(66, 66, 66));
         showGameBoard();
@@ -353,15 +353,20 @@ void showGameBegin()
     sf::Text BeginText("", font, 50);
 
     BeginText.setPosition(1150, 370);
-    if (!game_begin)
+    if (game_begin == 0)
     {
         BeginText.setString(L"开始游戏");
         GameButton.setFillColor(sf::Color(76, 175, 80));
     }
-    else
+    else if (game_begin == 1)
     {
         BeginText.setString(L"结束游戏");
         GameButton.setFillColor(sf::Color(183, 28, 28));
+    }
+    else
+    {
+        BeginText.setString(L"继续游戏");
+        GameButton.setFillColor(sf::Color(255, 152, 0));
     }
     mainWindow.draw(GameButton);
     mainWindow.draw(BeginText);
@@ -404,20 +409,20 @@ void handleButtons(int x, int y)
     }
     else if (contains(GameButton, x, y))
     {
-        if (game_begin)
+        if (game_begin == 1)
         {
             delete gameBoard;
             gameBoard = new Board;
-            game_begin = false;
+            game_begin = 0;
             nowPlayer = BLACK;
             black_time.reset();
             white_time.reset();
             top = -1;
             nowMove = {-1, -1};
         }
-        else
+        else if (game_begin == 0)
         {
-            game_begin = true;
+            game_begin = 1;
             if (nowPlayer == BLACK)
             {
                 black_time.begin();
@@ -429,6 +434,18 @@ void handleButtons(int x, int y)
                 white_time.begin();
                 black_time.begin();
                 black_time.stop();
+            }
+        }
+        else
+        {
+            game_begin = 1;
+            if (nowPlayer == BLACK)
+            {
+                black_time.start();
+            }
+            else
+            {
+                white_time.start();
             }
         }
     }
@@ -447,14 +464,7 @@ void handleButtons(int x, int y)
             }
             nowPlayer = -temp;
         }
-        if (nowPlayer == BLACK)
-        {
-            black_time.start();
-        }
-        else
-        {
-            white_time.start();
-        }
+        game_begin = -1;
     }
     else if (contains(undo_button, x, y))
     {
@@ -471,14 +481,7 @@ void handleButtons(int x, int y)
             nowMove = steps[top].action;
             nowPlayer = temp;
         }
-        if (nowPlayer == BLACK)
-        {
-            black_time.start();
-        }
-        else
-        {
-            white_time.start();
-        }
+        game_begin = -1;
     }
     else if (contains(print_button, x, y))
     {
@@ -511,7 +514,7 @@ void handleBoard(int x, int y)
         //////占边
         if (gameBoard->move(nowPlayer, {bx, by}) == 0)
         {
-            if (game_begin)
+            if (game_begin == 1)
             {
                 if (nowPlayer == BLACK)
                 {
@@ -542,7 +545,7 @@ void handleBoard(int x, int y)
         //////占边
         if (gameBoard->move(nowPlayer, {bx, by}) == 0)
         {
-            if (game_begin)
+            if (game_begin == 1)
             {
                 if (nowPlayer == BLACK)
                 {
