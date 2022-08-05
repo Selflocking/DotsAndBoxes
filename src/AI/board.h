@@ -21,7 +21,7 @@ class Board
 
     //局面估值
     bool getFreeBoxBool(int bx, int xy);      //*判断某个格子是否为自由格
-    int getPlayerBoxes(int player);           //*得到某个玩家占领的格子的总数
+    int getPlayerBoxes(int player) const;           //*得到某个玩家占领的格子的总数
     int getFreedom(int x, int y);             /**<得到自由度*/
     int getFreedom(LOC l);                    /**<得到自由度*/
     int getFreeEdgeNum();                     //*得到自由边的数量

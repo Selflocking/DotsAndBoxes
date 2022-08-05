@@ -141,8 +141,8 @@ void UCTMove(Board &CB, int Player, bool Msg, vector<LOC> &pace)
         //判定最佳收益
         int BestNodeNum = 0;
         float BestAvgValue = 0;
-//        int LargerTimesNodeNum = 0;
-//        int LargerTimesValue = 0;
+        //        int LargerTimesNodeNum = 0;
+        //        int LargerTimesValue = 0;
         for (int i = 0; i < UCTB.ExistChild; i++)
         {
             if (UCTB.ChildNodes[i]->AvgValue >= BestAvgValue)
@@ -150,11 +150,11 @@ void UCTMove(Board &CB, int Player, bool Msg, vector<LOC> &pace)
                 BestNodeNum = i;
                 BestAvgValue = UCTB.ChildNodes[i]->AvgValue;
             }
-//            if (UCTB.ChildNodes[i]->Times >= LargerTimesValue)
-//            {
-//                LargerTimesNodeNum = i;
-//                LargerTimesValue = UCTB.ChildNodes[i]->Times;
-//            }
+            //            if (UCTB.ChildNodes[i]->Times >= LargerTimesValue)
+            //            {
+            //                LargerTimesNodeNum = i;
+            //                LargerTimesValue = UCTB.ChildNodes[i]->Times;
+            //            }
         }
 
         CB.move(Player, {UCTB.NodeMoves[BestNodeNum].first, UCTB.NodeMoves[BestNodeNum].second});
@@ -189,16 +189,13 @@ void UCTMove(Board &CB, int Player, bool Msg, vector<LOC> &pace)
 
 void deleteUCTNode(Node *Root)
 {
-    if (Root->ExistChild > 0)
+    for (int i = 0; i < Root->ExistChild; i++)
     {
-        for (int i = 0; i < Root->ExistChild; i++)
-        {
-            deleteUCTNode(Root->ChildNodes[i]);
-            delete Root->ChildNodes[i];
-        }
+        deleteUCTNode(Root->ChildNodes[i]);
+        delete Root->ChildNodes[i];
     }
 }
-void deleteUCTTree(Node Root)
+void deleteUCTTree(Node &Root)
 {
     for (int i = 0; i < Root.ExistChild; i++)
     {
@@ -275,7 +272,7 @@ void UCTMoveWithSacrifice(Board &CB, int Player, bool Msg, vector<LOC> &pace)
 
             CB.move(Player, {DCMove.first, DCMove.second});
             pace.emplace_back(DCMove); //**记录步伐
-            for (;;)                //吃掉所有死格
+            for (;;)                   //吃掉所有死格
             {
                 if (!CB.getCTypeBoxLimit(Player, pace)) //**记录步伐
                     break;
@@ -363,7 +360,7 @@ void latterSituationMove(Board &CB, int Player, vector<LOC> &pace)
 
             CB.move(Player, DCMove);
             pace.emplace_back(DCMove); //**记录步伐
-            for (;;)                //直到无法占据CTypeBox了就结束
+            for (;;)                   //直到无法占据CTypeBox了就结束
             {
                 if (!CB.getCTypeBoxLimit(Player, pace)) //**记录步伐
                     break;

@@ -22,7 +22,6 @@ class ChainInfo
     LOC StartLoc;
     LOC EndLoc;
     bool ConditionOfPreCircle; //预备环的先决条件
-    vector<LOC> edgeLoc;
 };
 
 class BoxBoard : public Board

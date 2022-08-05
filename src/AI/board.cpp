@@ -40,6 +40,7 @@ Board::Board(int Array[LEN][LEN])
             map[i][j] = Array[i][j];
         }
     }
+    blackBox = whiteBox = 0;
     for (int i = 1; i < 11; i += 2)
     {
         for (int j = 1; j < 11; j += 2)
@@ -403,25 +404,25 @@ bool Board::getCTypeBoxLimit(int Player, vector<LOC> &pace)
                 {
                     move(Player, {x + 1, y});
                     pace.emplace_back(x + 1, y); //**记录步伐
-                    return true;                // 占据之后就返回真
+                    return true;                 // 占据之后就返回真
                 }
                 else if ((map[x - 1][y] == HENG || map[x - 1][y] == SHU) && !getCTypeBoxBool(x - 2, y))
                 {
                     move(Player, {x - 1, y});
                     pace.emplace_back(x - 1, y); //**记录步伐
-                    return true;                // 占据之后就返回真
+                    return true;                 // 占据之后就返回真
                 }
                 else if ((map[x][y + 1] == HENG || map[x][y + 1] == SHU) && !getCTypeBoxBool(x, y + 2))
                 {
                     move(Player, {x, y + 1});
                     pace.emplace_back(x, y + 1); //**记录步伐
-                    return true;                // 占据之后就返回真
+                    return true;                 // 占据之后就返回真
                 }
                 else if ((map[x][y - 1] == SHU || map[x][y - 1] == SHU) && !getCTypeBoxBool(x, y - 2))
                 {
                     move(Player, {x, y - 1});
                     pace.emplace_back(x, y - 1); //*记录步伐
-                    return true;                // 占据之后就返回真
+                    return true;                 // 占据之后就返回真
                 }
             }
         }
@@ -449,6 +450,7 @@ void Board::setBoard(int Array[LEN][LEN])
             map[i][j] = Array[i][j];
         }
     }
+    blackBox = whiteBox = 0;
     for (int i = 1; i < 11; i += 2)
     {
         for (int j = 1; j < 11; j += 2)
@@ -843,32 +845,44 @@ LOC Board::getPublicSide(LOC a, LOC b) // 传入新旧坐标
     return res;
 }
 
-int Board::getPlayerBoxes(int player)
+int Board::getPlayerBoxes(int player) const
 {
-    int boxes = 0;
-    if (player == BLACK)
+    switch (player)
     {
-        for (int i = 0; i < LEN; i++)
-        {
-            for (int j = 0; j < LEN; j++)
-            {
-                if (map[i][j] == BLACK)
-                    boxes++;
-            }
-        }
+    case BLACK:
+        return blackBox;
+        break;
+    case WHITE:
+        return whiteBox;
+        break;
+    default:
+        return 0;
+        break;
     }
-    else if (player == WHITE)
-    {
-        for (int i = 0; i < LEN; i++)
-        {
-            for (int j = 0; j < LEN; j++)
-            {
-                if (map[i][j] == WHITE)
-                    boxes++;
-            }
-        }
-    }
-    return boxes;
+    // int boxes = 0;
+    // if (player == BLACK)
+    // {
+    //     for (int i = 0; i < LEN; i++)
+    //     {
+    //         for (int j = 0; j < LEN; j++)
+    //         {
+    //             if (map[i][j] == BLACK)
+    //                 boxes++;
+    //         }
+    //     }
+    // }
+    // else if (player == WHITE)
+    // {
+    //     for (int i = 0; i < LEN; i++)
+    //     {
+    //         for (int j = 0; j < LEN; j++)
+    //         {
+    //             if (map[i][j] == WHITE)
+    //                 boxes++;
+    //         }
+    //     }
+    // }
+    // return boxes;
 }
 
 bool isOdd(int num)
@@ -881,7 +895,7 @@ bool isOdd(int num)
 bool isEven(int num)
 {
     // 判断一个数字是否是偶数
-    if (num % 2 == 0 || num == 0)
+    if (num % 2 == 0)
         return true;
     return false;
 }

@@ -13,43 +13,12 @@ ChainInfo::ChainInfo()
     ConditionOfPreCircle = false; // 是否预备环的先决条件
 }
 
-BoxBoard::BoxBoard(Board NewB)
+BoxBoard::BoxBoard(Board NewB) : Board(NewB)
 {
-    // 复制基本属性
-    for (int i = 0; i < LEN; i++)
-    {
-        for (int j = 0; j < LEN; j++)
-        {
-            map[i][j] = NewB.map[i][j];
-        }
-    }
-    blackBox = NewB.blackBox;
-    whiteBox = NewB.whiteBox;
 }
 
-BoxBoard::BoxBoard(int m[LEN][LEN])
+BoxBoard::BoxBoard(int m[LEN][LEN]) : Board(m)
 {
-    for (int i = 0; i < LEN; i++)
-    {
-        for (int j = 0; j < LEN; j++)
-        {
-            map[i][j] = m[i][j];
-        }
-    }
-    for (int i = 1; i < 11; i += 2)
-    {
-        for (int j = 1; j < 11; j += 2)
-        {
-            if (map[i][j] == BLACK)
-            {
-                blackBox++;
-            }
-            else if (map[i][j] == WHITE)
-            {
-                whiteBox++;
-            }
-        }
-    }
 }
 
 void BoxBoard::resetChainsInfo() // 重置链与格的信息，不使用0号空间
@@ -1017,9 +986,8 @@ LOC BoxBoard::getRationalStateBoxNum()
         // 有长链的时候，最后一个必定是长链
         Sacrifice = (PCNum * 4) + (CNum * 4) + (LCNum * 2) - 2;
     }
-    LOC num;
-    num = {Total - Sacrifice, Sacrifice};
-    return num;
+    
+    return {Total - Sacrifice, Sacrifice};
 }
 
 int BoxBoard::getBoardWinner(int LatterPlayer)
