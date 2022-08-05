@@ -264,7 +264,7 @@ void showNowPlayer()
     }
     else
     {
-        now_player.setPosition(1250, 50);
+        now_player.setPosition(1430, 50);
     }
     mainWindow.draw(now_player);
 }
