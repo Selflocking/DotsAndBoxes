@@ -6,6 +6,9 @@ void Time::begin()
 }
 void Time::stop()
 {
+    if (_begin == 0)
+        return;
+
     _clock += time(nullptr) - _begin;
     _begin = 0;
 }

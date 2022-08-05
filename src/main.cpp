@@ -434,14 +434,8 @@ void handleButtons(int x, int y)
     }
     else if (contains(redo_button, x, y))
     {
-        if (nowPlayer == BLACK)
-        {
-            black_time.stop();
-        }
-        else
-        {
-            white_time.stop();
-        }
+        black_time.stop();
+        white_time.stop();
         if (top != 60 && steps[top + 1].player != EMPTY)
         {
             int temp = steps[top + 1].player;
@@ -464,14 +458,8 @@ void handleButtons(int x, int y)
     }
     else if (contains(undo_button, x, y))
     {
-        if (nowPlayer == BLACK)
-        {
-            black_time.stop();
-        }
-        else
-        {
-            white_time.stop();
-        }
+        black_time.stop();
+        white_time.stop();
         if (top != -1)
         {
             int temp = steps[top].player;
