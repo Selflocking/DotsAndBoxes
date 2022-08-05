@@ -579,8 +579,8 @@ void AIMove()
             if (black_ai)
             {
                 ai_steps.clear();
-                work = std::async(std::launch::async, gameTurnMove, std::ref(*gameBoard), std::ref(nowPlayer), false,
-                                  &status, std::ref(ai_steps));
+                work = std::async(std::launch::async, gameTurnMove, std::ref(*gameBoard), std::ref(nowPlayer), &status,
+                                  std::ref(ai_steps));
             }
         }
         else
@@ -588,8 +588,8 @@ void AIMove()
             if (white_ai)
             {
                 ai_steps.clear();
-                work = std::async(std::launch::async, gameTurnMove, std::ref(*gameBoard), std::ref(nowPlayer), false,
-                                  &status, std::ref(ai_steps));
+                work = std::async(std::launch::async, gameTurnMove, std::ref(*gameBoard), std::ref(nowPlayer), &status,
+                                  std::ref(ai_steps));
             }
         }
     }

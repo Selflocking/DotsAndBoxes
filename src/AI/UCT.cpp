@@ -36,7 +36,7 @@ int getFilterMCWinner(Board &CB, int NextPlayer)
     int player = NextPlayer;
     while (CB.getFreeEdgeNum() != 0) //当还存在自由边的时候
     {
-        player = rndFilterTurn(CB, player, false); //#传入后续玩家#
+        player = rndFilterTurn(CB, player); //#传入后续玩家#
     }
     int W = getBoardWinner(CB, -player);
     return W;
@@ -47,7 +47,7 @@ int getFilterMCWinner(Board &CB, int NextPlayer, int &score) //第二个参数�
     int player = NextPlayer;
     while (CB.getFreeEdgeNum() != 0) //当还存在自由边的时候
     {
-        player = rndFilterTurn(CB, player, false); //#传入后续玩家#
+        player = rndFilterTurn(CB, player); //#传入后续玩家#
     }
     int W = getBoardWinner(CB, -player, -NextPlayer, score); //第三个参数为当前节点的父结点拥有者
     return W;
@@ -121,7 +121,7 @@ float UCTProcess(Node &B, int &Total) //#Total 尝试次数#
     }
 }
 
-void UCTMove(Board &CB, int Player, bool Msg, vector<LOC> &pace)
+void UCTMove(Board &CB, int Player, vector<LOC> &pace)
 {
     Node UCTB(Player, CB.map, true); //根据当前局面创建UCT的根节点
     if (UCTB.BoardWinner == 0)
@@ -157,25 +157,6 @@ void UCTMove(Board &CB, int Player, bool Msg, vector<LOC> &pace)
 
         CB.move(Player, {UCTB.NodeMoves[BestNodeNum].first, UCTB.NodeMoves[BestNodeNum].second});
         pace.emplace_back(UCTB.NodeMoves[BestNodeNum].first, UCTB.NodeMoves[BestNodeNum].second); //**记录步伐
-        // std::cout<<Total<<std::endl;
-        // if (Msg)
-        // {
-        //     cout << UCTB.NodeMoves[BestNodeNum].first << "," << UCTB.NodeMoves[BestNodeNum].second << " " << Player
-        //          << endl;
-        //     cout << "========================Infomation==========================\n";
-        //     cout << "当前节点平均收益为" << 1 - UCTB.AvgValue << endl;
-        //     if (BestNodeNum == LargerTimesNodeNum)
-        //         cout << "最大访问与最佳收益相同！\n";
-        //     else
-        //         cout << "最大访问不等同于最佳收益！\n";
-        //     cout << "最佳收益节点访问为" << UCTB.ChildNodes[BestNodeNum]->Times << endl;
-        //     cout << "最佳收益节点收益为" << UCTB.ChildNodes[BestNodeNum]->AvgValue << endl;
-        //     cout << "最多访问节点访问为" << UCTB.ChildNodes[LargerTimesNodeNum]->Times << endl;
-        //     cout << "最多访问节点收益为" << UCTB.ChildNodes[LargerTimesNodeNum]->AvgValue << endl;
-        //     cout << "本次UCT总迭代次数为" << Total << endl;
-        //     cout << "============================================================\n";
-        // }
-        //释放内存
         deleteUCTTree(UCTB);
     }
     else
@@ -202,7 +183,7 @@ void deleteUCTTree(Node &Root)
     }
 }
 
-void UCTMoveWithSacrifice(Board &CB, int Player, bool Msg, vector<LOC> &pace)
+void UCTMoveWithSacrifice(Board &CB, int Player, vector<LOC> &pace)
 {
 
     BoxBoard Dead(CB);
@@ -223,7 +204,7 @@ void UCTMoveWithSacrifice(Board &CB, int Player, bool Msg, vector<LOC> &pace)
         if (BoxNum.first - BoxNum.second <= SacrificeBoxNum) //放弃控制
         {
             CB.eatAllCTypeBoxes(Player, pace); //**记录步伐
-            UCTMove(CB, Player, true, pace);   //**记录步伐
+            UCTMove(CB, Player, pace);         //**记录步伐
         }
         else
         {
@@ -281,7 +262,7 @@ void UCTMoveWithSacrifice(Board &CB, int Player, bool Msg, vector<LOC> &pace)
     else //正常UCT移动
     {
         CB.eatAllCTypeBoxes(Player, pace); //**记录步伐
-        UCTMove(CB, Player, true, pace);   //**记录步伐
+        UCTMove(CB, Player, pace);         //**记录步伐
     }
 }
 
@@ -379,7 +360,7 @@ void latterSituationMove(Board &CB, int Player, vector<LOC> &pace)
 }
 
 //游戏移动，会根据前中后期自动移动
-void gameTurnMove(Board &CB, int Player, bool Msg, int *status, vector<LOC> &pace)
+void gameTurnMove(Board &CB, int Player, int *status, vector<LOC> &pace)
 {
     // This Function is using for the game's move turn.
 
@@ -387,7 +368,7 @@ void gameTurnMove(Board &CB, int Player, bool Msg, int *status, vector<LOC> &pac
     Test.eatAllCTypeBoxes(Player);
     bool LatterSituation = (Test.getFilterMoveNum() == 0);
     if (!LatterSituation)
-        UCTMoveWithSacrifice(CB, Player, Msg, pace);
+        UCTMoveWithSacrifice(CB, Player, pace);
     else //也就是后期局面了
     {
         //也就是Filter都已经无能为力的情况下，只有LongChain,Circle,PreCircle
@@ -396,7 +377,7 @@ void gameTurnMove(Board &CB, int Player, bool Msg, int *status, vector<LOC> &pac
     *status = 1;
 }
 
-int rndFilterTurn(Board &CB, int Player, bool Msg)
+int rndFilterTurn(Board &CB, int Player)
 {
     LOC Moves[60];
     CB.eatAllCTypeBoxes(Player); //此处第二个参数无实际意义
