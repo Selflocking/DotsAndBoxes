@@ -36,9 +36,7 @@ data_of_game::data_of_game(int a, int b, const char *p1, const char *p2)
     cJSON_AddNumberToObject(root, "BScore", b);
     time_t now = time(nullptr);
     tm *date = localtime(&now);
-    char buf[24];
-    sprintf(buf, "%d-%d-%d", date->tm_year, date->tm_mon, date->tm_mday);
-    cJSON_AddStringToObject(root, "Date", buf);
+    cJSON_AddStringToObject(root, "Date", "2022-08-06");
     cJSON_AddStringToObject(root, "Event", "2022 CCGC");
 }
 
