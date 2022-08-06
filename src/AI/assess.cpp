@@ -42,106 +42,113 @@ int BoxBoard::getFilterMoves(LOC Moves[60])
 {
     bool st[LEN][LEN] = {false};
     int MoveNum = 0;
-    for (int y = 0; y < LEN; y++)
+    for (int x = 0; x < 11; x += 2)
     {
-        for (int x = 0; x < LEN; x++)
+        for (int y = 1; y < 11; y += 2)
         {
-            if (map[x][y] == HENG || map[x][y] == SHU) // 若为空白边
+            if (map[x][y] == HENG)
             {
                 int BoardSave[LEN][LEN];
                 boardCopy(map, BoardSave); // 保存一下
                 move(BLACK, {x, y});       // 玩家模拟走一步试试
-
-                if (isOdd(x) && isEven(y)) // X奇数Y偶数，横行
+                if (x == 0)
                 {
-                    if (y == 0)
+                    if (!getLongCTypeBoxBool(x + 1, y)) // 如果右边的那个格子没问题的话，这个招法也没问题
                     {
-                        if (!getLongCTypeBoxBool(x, y + 1)) // 如果下面的那个格子没问题的话，这个招法也没问题
+                        BoxBoard test(BoardSave);
+                        if (test.getSaveChainEdgeBool(x + 1, y, st) && test.getSaveAngleEdgeBool(x + 1, y, st))
                         {
-                            BoxBoard test(BoardSave);
-                            if (test.getSaveChainEdgeBool(x, y + 1, st) && test.getSaveAngleEdgeBool(x, y + 1, st))
-                            {
-                                Moves[MoveNum] = {x, y};
-                                MoveNum++; // 总数目自增
-                            }
-                            // else
-                            //   cout<<"("<<x<<","<<y<<")"<<endl;
+                            Moves[MoveNum] = {x, y};
+                            MoveNum++; // 总数目自增
                         }
-                    }
-                    else if (y == LEN - 1)
-                    {
-                        if (!getLongCTypeBoxBool(x, y - 1)) // 如果上面的那个格子没问题的话，这个招法也没问题
-                        {
-                            BoxBoard test(BoardSave);
-                            if (test.getSaveChainEdgeBool(x, y - 1, st) && test.getSaveAngleEdgeBool(x, y - 1, st))
-                            {
-                                Moves[MoveNum] = {x, y};
-                                MoveNum++; // 总数目自增
-                            }
-                            // else
-                            //   cout<<"("<<x<<","<<y<<")"<<endl;
-                        }
-                    }
-                    else
-                    {
-                        if (!getLongCTypeBoxBool(x, y + 1) &&
-                            !getLongCTypeBoxBool(x, y - 1)) // 如果上下的格子都没问题的话，这个招法也没问题
-                        {
-                            BoxBoard test(BoardSave);
-                            if (test.getSaveChainEdgeBool(x, y + 1, st) && test.getSaveChainEdgeBool(x, y - 1, st))
-                            {
-                                Moves[MoveNum] = {x, y};
-                                MoveNum++; // 总数目自增
-                            }
-                            // else
-                            //   cout<<"("<<x<<","<<y<<")"<<endl;
-                        }
+                        // else
+                        //   cout<<"("<<x<<","<<y<<")"<<endl;
                     }
                 }
-                else // 竖行
+                else if (x == LEN - 1)
                 {
-                    if (x == 0)
+                    if (!getLongCTypeBoxBool(x - 1, y)) // 如果左边的那个格子没问题的话，这个招法也没问题
                     {
-                        if (!getLongCTypeBoxBool(x + 1, y)) // 如果右边的那个格子没问题的话，这个招法也没问题
+                        BoxBoard test(BoardSave);
+                        if (test.getSaveChainEdgeBool(x - 1, y, st) && test.getSaveAngleEdgeBool(x - 1, y, st))
                         {
-                            BoxBoard test(BoardSave);
-                            if (test.getSaveChainEdgeBool(x + 1, y, st) && test.getSaveAngleEdgeBool(x + 1, y, st))
-                            {
-                                Moves[MoveNum] = {x, y};
-                                MoveNum++; // 总数目自增
-                            }
-                            // else
-                            //   cout<<"("<<x<<","<<y<<")"<<endl;
+                            Moves[MoveNum] = {x, y};
+                            MoveNum++; // 总数目自增
                         }
+                        // else
+                        //   cout<<"("<<x<<","<<y<<")"<<endl;
                     }
-                    else if (x == LEN - 1)
+                }
+                else
+                {
+                    if (!getLongCTypeBoxBool(x + 1, y) &&
+                        !getLongCTypeBoxBool(x - 1, y)) // 如果左右两边的格子都没问题的话，这个招法也没问题
                     {
-                        if (!getLongCTypeBoxBool(x - 1, y)) // 如果左边的那个格子没问题的话，这个招法也没问题
+                        BoxBoard test(BoardSave);
+                        if (test.getSaveChainEdgeBool(x + 1, y, st) && test.getSaveChainEdgeBool(x - 1, y, st))
                         {
-                            BoxBoard test(BoardSave);
-                            if (test.getSaveChainEdgeBool(x - 1, y, st) && test.getSaveAngleEdgeBool(x - 1, y, st))
-                            {
-                                Moves[MoveNum] = {x, y};
-                                MoveNum++; // 总数目自增
-                            }
-                            // else
-                            //   cout<<"("<<x<<","<<y<<")"<<endl;
+                            Moves[MoveNum] = {x, y};
+                            MoveNum++; // 总数目自增
                         }
+                        // else
+                        //   cout<<"("<<x<<","<<y<<")"<<endl;
                     }
-                    else
+                }
+                setBoard(BoardSave); // 还原
+                st[x][y] = true;
+            }
+        }
+    }
+    for (int x = 1; x < 11; x += 2)
+    {
+        for (int y = 0; y < 11; y += 2)
+        {
+            if (map[x][y] == SHU)
+            {
+                int BoardSave[LEN][LEN];
+                boardCopy(map, BoardSave); // 保存一下
+                move(BLACK, {x, y});       // 玩家模拟走一步试试
+                if (y == 0)
+                {
+                    if (!getLongCTypeBoxBool(x, y + 1)) // 如果下面的那个格子没问题的话，这个招法也没问题
                     {
-                        if (!getLongCTypeBoxBool(x + 1, y) &&
-                            !getLongCTypeBoxBool(x - 1, y)) // 如果左右两边的格子都没问题的话，这个招法也没问题
+                        BoxBoard test(BoardSave);
+                        if (test.getSaveChainEdgeBool(x, y + 1, st) && test.getSaveAngleEdgeBool(x, y + 1, st))
                         {
-                            BoxBoard test(BoardSave);
-                            if (test.getSaveChainEdgeBool(x + 1, y, st) && test.getSaveChainEdgeBool(x - 1, y, st))
-                            {
-                                Moves[MoveNum] = {x, y};
-                                MoveNum++; // 总数目自增
-                            }
-                            // else
-                            //   cout<<"("<<x<<","<<y<<")"<<endl;
+                            Moves[MoveNum] = {x, y};
+                            MoveNum++; // 总数目自增
                         }
+                        // else
+                        //   cout<<"("<<x<<","<<y<<")"<<endl;
+                    }
+                }
+                else if (y == LEN - 1)
+                {
+                    if (!getLongCTypeBoxBool(x, y - 1)) // 如果上面的那个格子没问题的话，这个招法也没问题
+                    {
+                        BoxBoard test(BoardSave);
+                        if (test.getSaveChainEdgeBool(x, y - 1, st) && test.getSaveAngleEdgeBool(x, y - 1, st))
+                        {
+                            Moves[MoveNum] = {x, y};
+                            MoveNum++; // 总数目自增
+                        }
+                        // else
+                        //   cout<<"("<<x<<","<<y<<")"<<endl;
+                    }
+                }
+                else
+                {
+                    if (!getLongCTypeBoxBool(x, y + 1) &&
+                        !getLongCTypeBoxBool(x, y - 1)) // 如果上下的格子都没问题的话，这个招法也没问题
+                    {
+                        BoxBoard test(BoardSave);
+                        if (test.getSaveChainEdgeBool(x, y + 1, st) && test.getSaveChainEdgeBool(x, y - 1, st))
+                        {
+                            Moves[MoveNum] = {x, y};
+                            MoveNum++; // 总数目自增
+                        }
+                        // else
+                        //   cout<<"("<<x<<","<<y<<")"<<endl;
                     }
                 }
                 setBoard(BoardSave); // 还原
@@ -986,7 +993,7 @@ LOC BoxBoard::getRationalStateBoxNum()
         // 有长链的时候，最后一个必定是长链
         Sacrifice = (PCNum * 4) + (CNum * 4) + (LCNum * 2) - 2;
     }
-    
+
     return {Total - Sacrifice, Sacrifice};
 }
 
@@ -1034,7 +1041,7 @@ int BoxBoard::getBoardWinner(int LatterPlayer)
         return getWinner();
 }
 
-int BoxBoard::getBoardWinner(int LatterPlayer,int FaOwner, int &score)
+int BoxBoard::getBoardWinner(int LatterPlayer, int FaOwner, int &score)
 {
     // if (getFilterMoveNum() > 0)
     //     cout << "Wrong";
@@ -1063,15 +1070,19 @@ int BoxBoard::getBoardWinner(int LatterPlayer,int FaOwner, int &score)
         {
             r = BoxNum.first + getPlayerBoxes(BLACK); // 玩家是红方，则加上除去牺牲剩余的格子数
             b = BoxNum.second + getPlayerBoxes(WHITE);
-            if(FaOwner==BLACK) score=r;// score为该节点的父结点拥有者即player获得的格子数
-            else score=b;
+            if (FaOwner == BLACK)
+                score = r; // score为该节点的父结点拥有者即player获得的格子数
+            else
+                score = b;
         }
         else
         {
             r = BoxNum.second + getPlayerBoxes(BLACK);
             b = BoxNum.first + getPlayerBoxes(WHITE); // 玩家是蓝方，则加上牺牲剩余的格子数
-            if(FaOwner==BLACK) score=r;// score为该节点的父结点拥有者即player获得的格子数
-            else score=b;
+            if (FaOwner == BLACK)
+                score = r; // score为该节点的父结点拥有者即player获得的格子数
+            else
+                score = b;
         }
         if (r > b)
             return BLACK;
@@ -1080,8 +1091,10 @@ int BoxBoard::getBoardWinner(int LatterPlayer,int FaOwner, int &score)
     }
     else
     {
-        if(FaOwner==BLACK) score=blackBox;// score为该节点的父结点拥有者即player获得的格子数
-        else score=whiteBox;
+        if (FaOwner == BLACK)
+            score = blackBox; // score为该节点的父结点拥有者即player获得的格子数
+        else
+            score = whiteBox;
         return getWinner();
     }
 }

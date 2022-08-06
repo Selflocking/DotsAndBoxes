@@ -470,64 +470,72 @@ void Board::setBoard(int Array[LEN][LEN])
 int Board::getFilterMoveNum()
 {
     int MoveNum = 0;
-    for (int y = 0; y < LEN; y++)
+    //横
+    for (int x = 0; x < 11; x += 2)
     {
-        for (int x = 0; x < LEN; x++)
+        for (int y = 1; y < 11; y += 2)
         {
-            if (map[x][y] == HENG || map[x][y] == SHU) // 若为空白边
+            if (map[x][y] == HENG)
             {
                 int BoardSave[LEN][LEN];
                 boardCopy(map, BoardSave); // 保存一下
                 move(BLACK, {x, y});       // 玩家模拟走一步试试
-
-                if (isOdd(x) && isEven(y)) // X奇数Y偶数，横行
+                if (x == 0)
                 {
-                    if (y == 0)
+                    if (!getLongCTypeBoxBool(x + 1, y)) // 如果右边的那个格子没问题的话，这个招法也没问题
                     {
-                        if (!getLongCTypeBoxBool(x, y + 1)) // 如果下面的那个格子没问题的话，这个招法也没问题
-                        {
-                            MoveNum++; // 总数目自增
-                        }
-                    }
-                    else if (y == LEN - 1)
-                    {
-                        if (!getLongCTypeBoxBool(x, y - 1)) // 如果上面的那个格子没问题的话，这个招法也没问题
-                        {
-                            MoveNum++; // 总数目自增
-                        }
-                    }
-                    else
-                    {
-                        if (!getLongCTypeBoxBool(x, y + 1) &&
-                            !getLongCTypeBoxBool(x, y - 1)) // 如果上下的格子都没问题的话，这个招法也没问题
-                        {
-                            MoveNum++; // 总数目自增
-                        }
+                        MoveNum++; // 总数目自增
                     }
                 }
-                else // 竖行
+                else if (x == LEN - 1)
                 {
-                    if (x == 0)
+                    if (!getLongCTypeBoxBool(x - 1, y)) // 如果左边的那个格子没问题的话，这个招法也没问题
                     {
-                        if (!getLongCTypeBoxBool(x + 1, y)) // 如果右边的那个格子没问题的话，这个招法也没问题
-                        {
-                            MoveNum++; // 总数目自增
-                        }
+                        MoveNum++; // 总数目自增
                     }
-                    else if (x == LEN - 1)
+                }
+                else
+                {
+                    if (!getLongCTypeBoxBool(x + 1, y) &&
+                        !getLongCTypeBoxBool(x - 1, y)) // 如果左右两边的格子都没问题的话，这个招法也没问题
                     {
-                        if (!getLongCTypeBoxBool(x - 1, y)) // 如果左边的那个格子没问题的话，这个招法也没问题
-                        {
-                            MoveNum++; // 总数目自增
-                        }
+                        MoveNum++; // 总数目自增
                     }
-                    else
+                }
+                setBoard(BoardSave); // 还原
+            }
+        }
+    }
+    //竖
+    for (int x = 1; x < 11; x += 2)
+    {
+        for (int y = 0; y < 11; y += 2)
+        {
+            if (map[x][y] == SHU)
+            {
+                int BoardSave[LEN][LEN];
+                boardCopy(map, BoardSave); // 保存一下
+                move(BLACK, {x, y});       // 玩家模拟走一步试试
+                if (y == 0)
+                {
+                    if (!getLongCTypeBoxBool(x, y + 1)) // 如果下面的那个格子没问题的话，这个招法也没问题
                     {
-                        if (!getLongCTypeBoxBool(x + 1, y) &&
-                            !getLongCTypeBoxBool(x - 1, y)) // 如果左右两边的格子都没问题的话，这个招法也没问题
-                        {
-                            MoveNum++; // 总数目自增
-                        }
+                        MoveNum++; // 总数目自增
+                    }
+                }
+                else if (y == LEN - 1)
+                {
+                    if (!getLongCTypeBoxBool(x, y - 1)) // 如果上面的那个格子没问题的话，这个招法也没问题
+                    {
+                        MoveNum++; // 总数目自增
+                    }
+                }
+                else
+                {
+                    if (!getLongCTypeBoxBool(x, y + 1) &&
+                        !getLongCTypeBoxBool(x, y - 1)) // 如果上下的格子都没问题的话，这个招法也没问题
+                    {
+                        MoveNum++; // 总数目自增
                     }
                 }
                 setBoard(BoardSave); // 还原

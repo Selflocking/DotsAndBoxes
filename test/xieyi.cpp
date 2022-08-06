@@ -50,7 +50,7 @@ int main()
                 steps[++top] = {-ai == BLACK ? BLACK : WHITE, change(t)};
             }
             vector<LOC> moves;
-            gameTurnMove(*brd, ai, false, &temp, moves);
+            gameTurnMove(*brd, ai, &temp, moves);
             string res;
             for (auto const &i : moves)
             {
@@ -74,7 +74,7 @@ int main()
             {
                 ai = BLACK;
                 vector<LOC> moves;
-                gameTurnMove(*brd, ai, false, &temp, moves);
+                gameTurnMove(*brd, ai, &temp, moves);
                 string res;
                 for (auto const &i : moves)
                 {
