@@ -1,6 +1,6 @@
 #include "datarecorder.h"
 #include <fstream>
-#include <nowide/convert.hpp>
+#include <nowide/fstream.hpp>
 
 using std::fstream;
 using std::ios;
@@ -67,10 +67,10 @@ void data_of_game::printdata()
 {
     //（例如  A1：A1先手，A2后手，A1胜）
     char *json_data = cJSON_PrintUnformatted(root);
-    fstream out;
+    nowide::fstream out;
     char buf[64];
     sprintf(buf, "A6：%s先手，%s后手，%s胜.txt", pf, ps, winner);
-    out.open(nowide::widen(buf).c_str(), ios::out);
+    out.open(buf, ios::out);
     out << json_data;
     // cout << filename;
     out.close();

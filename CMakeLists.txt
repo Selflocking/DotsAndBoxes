@@ -9,8 +9,9 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 IF(WIN32)
 # 定义第三方库路径
 set(SFML_DIR 3rdparty/SFML/lib/cmake/SFML)
-set(nowide_DIR 3rdparty/nowide/lib/cmake/nowide)
 ENDIF()
+
+set(nowide_DIR 3rdparty/nowide/lib/cmake/nowide)
 
 # 如需静态链接SFML请取消下句注释
 #set(SFML_STATIC_LIBRARIES TRUE)
